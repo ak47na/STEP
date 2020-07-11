@@ -13,8 +13,7 @@
 // limitations under the License.
 
 /**
- * Generates a URL for a random image in the images directory and adds an img
- * element with that URL to the page.
+ * Adds a random quote to the page.
  */
 function addRandomQuote() {
   const quotes =
@@ -29,6 +28,11 @@ function addRandomQuote() {
   const quoteContainer = document.getElementById('random-quote-container');
   quoteContainer.innerText = quote;
 }
+
+/**
+ * Generates a URL for a random image in the images directory and adds an img
+ * element with that URL to the page.
+ */
 function randomizeImage() {
   // The images directory contains 2 images, so generate a random index between
   // 1 and 2.
