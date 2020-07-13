@@ -13,9 +13,9 @@
 // limitations under the License.
 
 /**
- * Adds a random quote to the page.
+ * Displays a random quote to the page.
  */
-function addRandomQuote() {
+function showRandomQuote() {
   const quotes =
       ['One day, one lifetime', 
        'The moment you say “I know everything” is the end of your growth',
