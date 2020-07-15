@@ -47,3 +47,12 @@ function randomizeImage() {
   imageContainer.innerHTML = '';
   imageContainer.appendChild(imgElement);
 }
+
+/**
+ * Fetches a random name from the server and adds it to the DOM.
+ */
+function getRandomName() {
+  fetch('/data').then(response => response.text()).then((name) => {
+    document.getElementById('name-container').innerText = name;
+  });
+}
