@@ -14,7 +14,8 @@
 
 package com.google.sps.servlets;
 
-import java.io.IOException;
+import java.io.*;//IOException;
+import java.util.*; 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -24,9 +25,18 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
 
+  private List<String> names;
+
+  @Override
+  public void init() {
+      names = new ArrayList<>(Arrays.asList("Oliver", "Harry", "George", "Emma", "Ava", "Mia"));
+  }
+
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    String name = names.get((int) (Math.random() * names.size()));
+    
     response.setContentType("text/html;");
-    response.getWriter().println("<h1>Hello world!</h1>");
+    response.getWriter().println("Hello " + name + "!");
   }
 }
