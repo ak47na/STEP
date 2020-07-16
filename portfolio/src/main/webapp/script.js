@@ -56,3 +56,25 @@ function getRandomName() {
     document.getElementById('name-container').innerText = name;
   });
 }
+
+/**
+ * Fetches names from DataServlet and adds them to the DOM as a list.
+ */
+function getNames() {
+  fetch('/data').then(response => response.json()).then((names) => {
+
+    const namesListElement = document.getElementById('names-container');
+    namesListElement.innerHTML = '';
+    for (const nameIndex in names) {
+     
+      namesListElement.appendChild(
+          createListElement(`The  ${+nameIndex + 1} -th name is ${names[nameIndex]}`));
+    }
+  });
+}
+
+function createListElement(text) {
+  const liElement = document.createElement('li');
+  liElement.innerText = text;
+  return liElement;
+}
