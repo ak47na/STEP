@@ -66,9 +66,9 @@ function getNames() {
     const namesListElement = document.getElementById('names-container');
     namesListElement.innerHTML = '';
     for (const nameIndex in names) {
-      console.log(names[nameIndex]);
+     
       namesListElement.appendChild(
-          createListElement('The ' + (+nameIndex + 1).toString() + '-th name is ' + names[nameIndex]));
+          createListElement(`The  ${+nameIndex + 1} -th name is ${names[nameIndex]}`));
     }
   });
 }
