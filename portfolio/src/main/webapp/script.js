@@ -58,7 +58,7 @@ function getRandomName() {
 }
 
 /**
- * Fetches names from the DataServlet and adds them to the DOM.
+ * Fetches names from DataServlet and adds them to the DOM as a list.
  */
 function getNames() {
   fetch('/data').then(response => response.json()).then((names) => {
