@@ -15,6 +15,7 @@
 package com.google.sps.servlets;
 
 import java.io.IOException;
+import javax.servlet.ServletException;
 import java.io.UnsupportedEncodingException;
 import com.google.gson.Gson;
 import java.util.*; 
@@ -39,13 +40,14 @@ public class DataServlet extends HttpServlet {
   }
 
   @Override
-  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+  public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     // Get the comment from the form
-    String newComment = getNewComment(request);
-    if (newComment == "") {
-      response.setContentType("text/html");
-      response.getWriter().println("Please enter a valid comment.");
-      return;
+    String newComment = null;
+
+    try {
+      newComment = getNewComment(request);
+    } catch (UnsupportedEncodingException e) {
+      throw new ServletException("Please enter a valid comment!");
     }
     
     comments.add(newComment);
@@ -54,17 +56,11 @@ public class DataServlet extends HttpServlet {
     response.sendRedirect("/index.html");
   }
 
-  private String getNewComment(HttpServletRequest request) {
+  private String getNewComment(HttpServletRequest request) throws UnsupportedEncodingException {
     String newComment = request.getParameter("new-comment");
 
-    byte[] commentBytes = null;
-    try {
-      commentBytes = newComment.getBytes("UTF-8");
-    } catch (UnsupportedEncodingException e) {
-      System.err.println("Invalid comment: " + newComment);
-      return "";
-    }
-
+    byte[] commentBytes = newComment.getBytes("UTF-8");
     return newComment;
   }
+  
 }
