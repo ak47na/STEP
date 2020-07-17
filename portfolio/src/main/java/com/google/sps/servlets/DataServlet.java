@@ -23,6 +23,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.nio.charset.StandardCharsets;
 
 /** Servlet that returns some example content. TODO: modify this file to handle comments data */
 @WebServlet("/data")
@@ -40,14 +41,18 @@ public class DataServlet extends HttpServlet {
   }
 
   @Override
-  public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // Get the comment from the form
     String newComment = null;
-
     try {
       newComment = getNewComment(request);
     } catch (UnsupportedEncodingException e) {
-      throw new ServletException("Please enter a valid comment!");
+      // Send a HTTP 400 Bad Request response if user provided invalid data.
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+    } 
+    catch (Exception e) {
+      // Send a HTTP 500 error for other exceptions
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
     }
     
     comments.add(newComment);
