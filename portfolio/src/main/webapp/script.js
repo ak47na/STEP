@@ -64,6 +64,7 @@ function getComments() {
   fetch('/data').then(response => response.json()).then((comments) => {
 
     const commentsListElement = document.getElementById('comments-history');
+    console.log(comments);
     commentsListElement.innerHTML = '';
     for (const commentIndex in comments) {
       commentsListElement.appendChild(
@@ -71,7 +72,9 @@ function getComments() {
     }
   });
 }
-
+/*
+  Returns HTML list element with text 
+*/
 function createListElement(text) {
   const liElement = document.createElement('li');
   liElement.innerText = text;

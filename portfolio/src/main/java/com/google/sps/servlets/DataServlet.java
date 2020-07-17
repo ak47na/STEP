@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 public class DataServlet extends HttpServlet {
 
   private List<String> comments = new ArrayList<String>();
-
+  
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     Gson gson = new Gson();
@@ -47,7 +47,7 @@ public class DataServlet extends HttpServlet {
       response.getWriter().println("Please enter a valid comment.");
       return;
     }
-
+    
     comments.add(newComment);
 
     // Redirect back to the HTML page.
