@@ -62,5 +62,4 @@ public class DataServlet extends HttpServlet {
     byte[] commentBytes = newComment.getBytes("UTF-8");
     return newComment;
   }
-  
 }
