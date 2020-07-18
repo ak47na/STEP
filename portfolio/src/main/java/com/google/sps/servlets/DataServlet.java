@@ -14,11 +14,19 @@
 
 package com.google.sps.servlets;
 
-import java.io.IOException;
-import javax.servlet.ServletException;
-import java.io.UnsupportedEncodingException;
+
 import com.google.gson.Gson;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.SortDirection;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.sql.Timestamp;
 import java.util.*; 
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -28,11 +36,18 @@ import java.nio.charset.StandardCharsets;
 /** Servlet that returns some example content. TODO: modify this file to handle comments data */
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
-
-  private List<String> comments = new ArrayList<String>();
   
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
+    PreparedQuery results = datastore.prepare(query);
+
+    List<String> comments = new ArrayList<>();
+    for (Entity comment: results.asIterable()) {
+      comments.add((String)comment.getProperty("message"));
+    }
+    
     Gson gson = new Gson();
     String commentsJson = gson.toJson(comments);
 
@@ -54,8 +69,14 @@ public class DataServlet extends HttpServlet {
       // Send a HTTP 500 error for other exceptions
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
     }
-    
-    comments.add(newComment);
+    Entity commentEntity = new Entity("Comment");
+    commentEntity.setProperty("message", newComment);
+
+    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+    commentEntity.setProperty("timestamp", timestamp.getTime());
+
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    datastore.put(commentEntity);
 
     // Redirect back to the HTML page.
     response.sendRedirect("/index.html");
@@ -63,7 +84,7 @@ public class DataServlet extends HttpServlet {
 
   private String getNewComment(HttpServletRequest request) throws UnsupportedEncodingException {
     String newComment = request.getParameter("new-comment");
-
+   
     byte[] commentBytes = newComment.getBytes("UTF-8");
     return newComment;
   }
