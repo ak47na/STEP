@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
   </head>
-  <body>
+  <body onload="getComments()">
     <div id="content">
       <h1>AnaK's Portfolio</h1>
       
@@ -32,13 +32,15 @@
 
       <p>Click <a href="placesGallery.html">here</a> to see some of my favourite places!</p>
 
-      <h1>Random Names</h1>
-      <p>Click here to see a random name:</p>
-      <button onclick="getRandomName()">Fetch a name!</button>
-      <h1 id="name-container"></h1>
+      <h1>Comments:</h1>
+      <ul id="comments-history"></ul>
+      
+      <form action="/data" method="POST">
+      <p>Write a new comment:</p>
+      <textarea name="new-comment"></textarea>
 
-      <button onclick="getNames()">Fetch names!</button>
-      <ul id="names-container"></ul>
+      <input type="submit" />
+      </form>
 
     </div>
   </body>

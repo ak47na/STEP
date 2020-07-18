@@ -58,21 +58,23 @@ function getRandomName() {
 }
 
 /**
- * Fetches names from DataServlet and adds them to the DOM as a list.
+ * Fetches comments from DataServlet and adds them to the DOM as a list.
  */
-function getNames() {
-  fetch('/data').then(response => response.json()).then((names) => {
+function getComments() {
+  fetch('/data').then(response => response.json()).then((comments) => {
 
-    const namesListElement = document.getElementById('names-container');
-    namesListElement.innerHTML = '';
-    for (const nameIndex in names) {
-     
-      namesListElement.appendChild(
-          createListElement(`The  ${+nameIndex + 1} -th name is ${names[nameIndex]}`));
+    const commentsListElement = document.getElementById('comments-history');
+    
+    commentsListElement.innerHTML = '';
+    for (const commentIndex in comments) {
+      commentsListElement.appendChild(
+          createListElement(comments[commentIndex]));
     }
   });
 }
-
+/*
+  Returns HTML list element with text 
+*/
 function createListElement(text) {
   const liElement = document.createElement('li');
   liElement.innerText = text;

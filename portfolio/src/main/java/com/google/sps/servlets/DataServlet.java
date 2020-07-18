@@ -15,30 +15,56 @@
 package com.google.sps.servlets;
 
 import java.io.IOException;
+import javax.servlet.ServletException;
+import java.io.UnsupportedEncodingException;
 import com.google.gson.Gson;
 import java.util.*; 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.nio.charset.StandardCharsets;
 
 /** Servlet that returns some example content. TODO: modify this file to handle comments data */
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
 
-  private List<String> names;
-
-  @Override
-  public void init() {
-      names = new ArrayList<>(Arrays.asList("Harry", "Ava", "Mia"));
-  }
-
+  private List<String> comments = new ArrayList<String>();
+  
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     Gson gson = new Gson();
-    String namesJson = gson.toJson(names);
+    String commentsJson = gson.toJson(comments);
 
     response.setContentType("application/json;");
-    response.getWriter().println(namesJson);
+    response.getWriter().println(commentsJson);
+  }
+
+  @Override
+  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    // Get the comment from the form
+    String newComment = null;
+    try {
+      newComment = getNewComment(request);
+    } catch (UnsupportedEncodingException e) {
+      // Send a HTTP 400 Bad Request response if user provided invalid data.
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+    } 
+    catch (Exception e) {
+      // Send a HTTP 500 error for other exceptions
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+    }
+    
+    comments.add(newComment);
+
+    // Redirect back to the HTML page.
+    response.sendRedirect("/index.html");
+  }
+
+  private String getNewComment(HttpServletRequest request) throws UnsupportedEncodingException {
+    String newComment = request.getParameter("new-comment");
+
+    byte[] commentBytes = newComment.getBytes("UTF-8");
+    return newComment;
   }
 }
