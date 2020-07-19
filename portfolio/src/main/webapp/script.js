@@ -74,6 +74,15 @@ function getComments() {
     }
   });
 }
+
+/*
+  Sends a POST request to DeleteDataServlet to delete all the comments and calls getComments() to
+  remove the comments from the page
+*/
+function deleteAllComments() {
+  fetch('delete-data', {method: 'POST'}).then(getComments());
+}
+
 /*
   Returns HTML list element with text 
 */

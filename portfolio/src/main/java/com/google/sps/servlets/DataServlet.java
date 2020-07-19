@@ -33,11 +33,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 
-/** Servlet that returns some example content. TODO: modify this file to handle comments data */
+/** Servlet that handles comments data */
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
   /*
-    Send at most commentsLimit comments back to the browser
+    Sends at most commentsLimit comments as a JSON string
   */
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {

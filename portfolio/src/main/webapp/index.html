@@ -34,9 +34,9 @@
       
       <h1>Comments:</h1>
       <ul id="comments-history"></ul>
-
+      
       <p>Choose the maximum number of comments to be displayed:</p>
-      <input type="number" id="commentsLimit" name="commentsLimit" min="0" max="20" onchange="getComments()" >
+      <input type="number" id="commentsLimit" name="commentsLimit" size="5" onchange="getComments()" >
       
       <form action="/data" method="POST">
       <p>Write a new comment:</p>
@@ -44,6 +44,8 @@
 
       <input type="submit" />
       </form>
+      
+      <button onclick="deleteAllComments()">Delete all the comments</button>
 
     </div>
   </body>
