@@ -58,11 +58,13 @@ function getRandomName() {
 }
 
 /**
- * Fetches comments from DataServlet and adds them to the DOM as a list.
+ * Fetches the last commentsLimit comments from DataServlet and adds them to the DOM as a list.
+   commentsLimit is selected by the user and sent to the server as parameter in the query string.
  */
 function getComments() {
-  fetch('/data').then(response => response.json()).then((comments) => {
+  const dataURL = `data?commentsLimit=${document.getElementById('commentsLimit').value}`;
 
+  fetch(dataURL).then(response => response.json()).then((comments) => {
     const commentsListElement = document.getElementById('comments-history');
     
     commentsListElement.innerHTML = '';
