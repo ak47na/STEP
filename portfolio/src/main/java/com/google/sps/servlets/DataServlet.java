@@ -14,7 +14,6 @@
 
 package com.google.sps.servlets;
 
-
 import com.google.gson.Gson;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -36,9 +35,9 @@ import java.nio.charset.StandardCharsets;
 /** Servlet that handles comments data */
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
-  /*
-    Sends at most commentsLimit comments as a JSON string
-  */
+  /**
+   * Sends at most commentsLimit comments as a JSON string
+   */
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -97,9 +96,9 @@ public class DataServlet extends HttpServlet {
     // Redirect back to the HTML page.
     response.sendRedirect("/index.html");
   }
-  /*
-    Get the maximum number of comments to be displayed from the queryString
-  */
+  /**
+   * Get the maximum number of comments to be displayed from the queryString
+   */
   private String getCommentsLimit(HttpServletRequest request) {
     if (request.getQueryString() == null) {
       return "5";

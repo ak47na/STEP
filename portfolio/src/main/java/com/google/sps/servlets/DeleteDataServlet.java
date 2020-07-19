@@ -32,8 +32,8 @@ import java.nio.charset.StandardCharsets;
 
 @WebServlet("/delete-data")
 public class DeleteDataServlet extends HttpServlet {
-  /*
-    Delete all the comments from datastore  
+  /**
+   * Delete all the comments from datastore  
   */
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
