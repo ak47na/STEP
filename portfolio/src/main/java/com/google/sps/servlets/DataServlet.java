@@ -42,17 +42,34 @@ public class DataServlet extends HttpServlet {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
     PreparedQuery results = datastore.prepare(query);
+    
+    int limit;
+    try {
+      limit = Integer.parseInt(request.getParameter("commentsLimit"));
+    } catch (Exception e)
+    {
+        // if data selected by user is invalid, use default value
+        limit = 5;
+    }
 
     List<String> comments = new ArrayList<>();
     for (Entity comment: results.asIterable()) {
       comments.add((String)comment.getProperty("message"));
+
+      -- limit;
+      if (limit == 0) {
+        break;
+      }
     }
     
     Gson gson = new Gson();
     String commentsJson = gson.toJson(comments);
+    System.out.println(comments.toString());
+    System.out.println(commentsJson);
 
     response.setContentType("application/json;");
     response.getWriter().println(commentsJson);
+    response.sendRedirect("/index.html");
   }
 
   @Override

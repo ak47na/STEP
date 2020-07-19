@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
   </head>
-  <body onload ="getComments()">
+  <body>
     <div id="content">
       <h1>AnaK's Portfolio</h1>
       
@@ -31,9 +31,17 @@
       <div id="random-image-container"></div>
 
       <p>Click <a href="placesGallery.html">here</a> to see some of my favourite places!</p>
-
+      
       <h1>Comments:</h1>
       <ul id="comments-history"></ul>
+      
+      <form action="/data" method="GET">
+
+      <label for="commentsLimit">Choose the maximum number of comments to be displayed:</label>
+      <input type="number" id="commentsLimit" name="commentsLimit" min="0" max="20" >
+      <input type="submit" />
+
+      </form>
       
       <form action="/data" method="POST">
       <p>Write a new comment:</p>

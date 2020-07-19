@@ -58,17 +58,17 @@ function getRandomName() {
 }
 
 /**
- * Fetches comments from DataServlet and adds them to the DOM as a list.
+ * Fetches the last nrComments comments from DataServlet and adds them to the DOM as a list.
+   nrComments is selected by the user and sent to the server as parameter in the query string.
  */
 function getComments() {
   fetch('/data').then(response => response.json()).then((comments) => {
-
     const commentsListElement = document.getElementById('comments-history');
-    
+    console.log(comments);
     commentsListElement.innerHTML = '';
     for (const commentIndex in comments) {
       commentsListElement.appendChild(
-          createListElement(comments[commentIndex]));
+        createListElement(comments[commentIndex]));
     }
   });
 }
