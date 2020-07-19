@@ -36,16 +36,18 @@ import java.nio.charset.StandardCharsets;
 /** Servlet that returns some example content. TODO: modify this file to handle comments data */
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
-  
+  /*
+    Send at most commentsLimit comments back to the browser
+  */
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
     PreparedQuery results = datastore.prepare(query);
-    
+   
     int limit;
     try {
-      limit = Integer.parseInt(request.getParameter("commentsLimit"));
+      limit = Integer.parseInt(getCommentsLimit(request));
     } catch (Exception e)
     {
         // if data selected by user is invalid, use default value
@@ -64,12 +66,9 @@ public class DataServlet extends HttpServlet {
     
     Gson gson = new Gson();
     String commentsJson = gson.toJson(comments);
-    System.out.println(comments.toString());
-    System.out.println(commentsJson);
 
     response.setContentType("application/json;");
     response.getWriter().println(commentsJson);
-    response.sendRedirect("/index.html");
   }
 
   @Override
@@ -97,6 +96,24 @@ public class DataServlet extends HttpServlet {
 
     // Redirect back to the HTML page.
     response.sendRedirect("/index.html");
+  }
+  /*
+    Get the maximum number of comments to be displayed from the queryString
+  */
+  private String getCommentsLimit(HttpServletRequest request) {
+    if (request.getQueryString() == null) {
+      return "5";
+    }
+    String[] queryStringArray = request.getQueryString().split("&");
+
+    for (String keyValuePair : queryStringArray) {
+      String[] keyValuePairArray = keyValuePair.split("=");
+      if (keyValuePairArray[0].equals("commentsLimit")) {
+        return keyValuePairArray[1];
+      }
+    }
+    // return default value if none was provided
+    return "5";
   }
 
   private String getNewComment(HttpServletRequest request) throws UnsupportedEncodingException {

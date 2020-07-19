@@ -34,14 +34,9 @@
       
       <h1>Comments:</h1>
       <ul id="comments-history"></ul>
-      
-      <form action="/data" method="GET">
 
-      <label for="commentsLimit">Choose the maximum number of comments to be displayed:</label>
-      <input type="number" id="commentsLimit" name="commentsLimit" min="0" max="20" >
-      <input type="submit" />
-
-      </form>
+      <p>Choose the maximum number of comments to be displayed:</p>
+      <input type="number" id="commentsLimit" name="commentsLimit" min="0" max="20" onchange="getComments()" >
       
       <form action="/data" method="POST">
       <p>Write a new comment:</p>
