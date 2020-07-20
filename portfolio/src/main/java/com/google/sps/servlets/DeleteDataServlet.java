@@ -45,8 +45,5 @@ public class DeleteDataServlet extends HttpServlet {
       Key commentKey = comment.getKey();
       datastore.delete(commentKey);
     }
-
-    // Redirect back to the HTML page.
-    response.sendRedirect("/index.html");
   }
 }

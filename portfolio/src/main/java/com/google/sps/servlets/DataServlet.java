@@ -35,6 +35,17 @@ import java.nio.charset.StandardCharsets;
 /** Servlet that handles comments data */
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
+  
+  public static final int MAX_COMMENTS = 100;
+  private DatastoreService datastore;
+  private Query commentsQuery;
+  /** Initializes data needed to load comments from datastore when requested */
+  @Override
+  public void init() {
+    datastore = DatastoreServiceFactory.getDatastoreService();
+    commentsQuery = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
+  }
+
   /**
    * Sends at most commentsLimit comments as a JSON string
    */
@@ -44,6 +55,9 @@ public class DataServlet extends HttpServlet {
     try {
       // Get the maximum number of comments to be displayed from the queryString
       limit = Integer.parseInt(request.getParameter("commentsLimit"));
+      if (limit < 0 || limit > MAX_COMMENTS) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "The number selected is invalid");
+      }
     } catch (Exception e) {
       // Send a HTTP 400 Bad Request response if user provided invalid data.
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
@@ -71,16 +85,14 @@ public class DataServlet extends HttpServlet {
     }
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    datastore.put(getCommentEntity(newComment));
+    datastore.put(createCommentEntity(newComment));
 
     // Redirect back to the HTML page.
     response.sendRedirect("/index.html");
   }
 
   private List<String> getCommentsArray(int limit) {
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
-    PreparedQuery results = datastore.prepare(query);
+    PreparedQuery results = datastore.prepare(commentsQuery);
 
     List<String> comments = new ArrayList<>();
     for (Entity comment: results.asIterable()) {
@@ -95,7 +107,7 @@ public class DataServlet extends HttpServlet {
   }
 
   /** Creates Entity with a kind of Comment */
-  private Entity getCommentEntity(String newComment) {
+  private Entity createCommentEntity(String newComment) {
     Entity commentEntity = new Entity("Comment");
     commentEntity.setProperty("message", newComment);
 

@@ -62,17 +62,29 @@ function getRandomName() {
  * commentsLimit is selected by the user and sent to the server as parameter in the query string.
  */
 function getComments() {
-  const dataURL = `data?commentsLimit=${document.getElementById('commentsLimit').value}`;
+  const dataURL = `/data?commentsLimit=${document.getElementById('commentsLimit').value}`;
 
-  fetch(dataURL).then(response => response.json()).then((comments) => {
-    const commentsListElement = document.getElementById('comments-history');
+  fetch(dataURL).then(response => {
+      if (response.status == 200) {
+        return response.json();
+      } else {
+        if (response.status == 400) {
+          throw new Error("Invalid data: The number of comments should be between 0 and 100");
+        } else {
+          throw new Error("Error!");
+        }
+      }
+      }).then(comments => {
+      const commentsListElement = document.getElementById('comments-history');
     
-    commentsListElement.innerHTML = '';
-    for (const commentIndex in comments) {
-      commentsListElement.appendChild(
+      commentsListElement.innerHTML = '';
+      for (const commentIndex in comments) {
+        commentsListElement.appendChild(
           createListElement(comments[commentIndex]));
-    }
-  });
+      }
+      }).catch(dataError => {
+      alert(dataError);
+    });
 }
 
 /** 
