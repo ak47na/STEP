@@ -96,12 +96,12 @@ public class DataServlet extends HttpServlet {
 
     List<String> comments = new ArrayList<>();
     for (Entity comment: results.asIterable()) {
-      comments.add((String)comment.getProperty("message"));
-
-      -- limit;
       if (limit == 0) {
         break;
       }
+      -- limit;
+      
+      comments.add((String)comment.getProperty("message"));
     }
     return comments;
   }
