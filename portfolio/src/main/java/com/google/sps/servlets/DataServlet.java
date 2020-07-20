@@ -44,13 +44,13 @@ public class DataServlet extends HttpServlet {
     Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
     PreparedQuery results = datastore.prepare(query);
    
-    int limit;
+    Integer limit = null;
     try {
-      limit = Integer.parseInt(getCommentsLimit(request));
-    } catch (Exception e)
-    {
-        // if data selected by user is invalid, use default value
-        limit = 5;
+      // Get the maximum number of comments to be displayed from the queryString
+      limit = Integer.parseInt(request.getParameter("commentsLimit"));
+    } catch (Exception e) {
+      // Send a HTTP 400 Bad Request response if user provided invalid data.
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
     }
 
     List<String> comments = new ArrayList<>();
@@ -79,8 +79,7 @@ public class DataServlet extends HttpServlet {
     } catch (UnsupportedEncodingException e) {
       // Send a HTTP 400 Bad Request response if user provided invalid data.
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-    } 
-    catch (Exception e) {
+    } catch (Exception e) {
       // Send a HTTP 500 error for other exceptions
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
     }
@@ -96,25 +95,7 @@ public class DataServlet extends HttpServlet {
     // Redirect back to the HTML page.
     response.sendRedirect("/index.html");
   }
-  /**
-   * Get the maximum number of comments to be displayed from the queryString
-   */
-  private String getCommentsLimit(HttpServletRequest request) {
-    if (request.getQueryString() == null) {
-      return "5";
-    }
-    String[] queryStringArray = request.getQueryString().split("&");
-
-    for (String keyValuePair : queryStringArray) {
-      String[] keyValuePairArray = keyValuePair.split("=");
-      if (keyValuePairArray[0].equals("commentsLimit")) {
-        return keyValuePairArray[1];
-      }
-    }
-    // return default value if none was provided
-    return "5";
-  }
-
+  
   private String getNewComment(HttpServletRequest request) throws UnsupportedEncodingException {
     String newComment = request.getParameter("new-comment");
    
