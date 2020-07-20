@@ -40,10 +40,6 @@ public class DataServlet extends HttpServlet {
    */
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
-    PreparedQuery results = datastore.prepare(query);
-   
     Integer limit = null;
     try {
       // Get the maximum number of comments to be displayed from the queryString
@@ -53,18 +49,8 @@ public class DataServlet extends HttpServlet {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
     }
 
-    List<String> comments = new ArrayList<>();
-    for (Entity comment: results.asIterable()) {
-      comments.add((String)comment.getProperty("message"));
-
-      -- limit;
-      if (limit == 0) {
-        break;
-      }
-    }
-    
     Gson gson = new Gson();
-    String commentsJson = gson.toJson(comments);
+    String commentsJson = gson.toJson(getCommentsArray(limit));
 
     response.setContentType("application/json;");
     response.getWriter().println(commentsJson);
@@ -83,17 +69,39 @@ public class DataServlet extends HttpServlet {
       // Send a HTTP 500 error for other exceptions
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
     }
+
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    datastore.put(getCommentEntity(newComment));
+
+    // Redirect back to the HTML page.
+    response.sendRedirect("/index.html");
+  }
+
+  private List<String> getCommentsArray(int limit) {
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
+    PreparedQuery results = datastore.prepare(query);
+
+    List<String> comments = new ArrayList<>();
+    for (Entity comment: results.asIterable()) {
+      comments.add((String)comment.getProperty("message"));
+
+      -- limit;
+      if (limit == 0) {
+        break;
+      }
+    }
+    return comments;
+  }
+
+  /** Creates Entity with a kind of Comment */
+  private Entity getCommentEntity(String newComment) {
     Entity commentEntity = new Entity("Comment");
     commentEntity.setProperty("message", newComment);
 
     Timestamp timestamp = new Timestamp(System.currentTimeMillis());
     commentEntity.setProperty("timestamp", timestamp.getTime());
-
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    datastore.put(commentEntity);
-
-    // Redirect back to the HTML page.
-    response.sendRedirect("/index.html");
+    return commentEntity;
   }
   
   private String getNewComment(HttpServletRequest request) throws UnsupportedEncodingException {
