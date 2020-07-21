@@ -59,6 +59,7 @@ function getRandomName() {
 
 /**
  * Fetches the last commentsLimit comments from DataServlet and adds them to the DOM as a list.
+<<<<<<< HEAD
    commentsLimit is selected by the user and sent to the server as parameter in the query string.
  */
 function getComments() {
@@ -66,17 +67,47 @@ function getComments() {
 
   fetch(dataURL).then(response => response.json()).then((comments) => {
     const commentsListElement = document.getElementById('comments-history');
+=======
+ * commentsLimit is selected by the user and sent to the server as parameter in the query string.
+ */
+function getComments() {
+  const dataURL = `/data?commentsLimit=${document.getElementById('commentsLimit').value}`;
+
+  fetch(dataURL).then(response => {
+      if (response.status == 200) {
+        return response.json();
+      } else {
+        if (response.status == 400) {
+          throw new Error("Invalid data: The number of comments should be between 0 and 100");
+        } else {
+          throw new Error("Error!");
+        }
+      }
+      }).then(comments => {
+      const commentsListElement = document.getElementById('comments-history');
+>>>>>>> 9f0e61f7067a3168d39d4b9cbe06c8fb5e59543c
     
-    commentsListElement.innerHTML = '';
-    for (const commentIndex in comments) {
-      commentsListElement.appendChild(
+      commentsListElement.innerHTML = '';
+      for (const commentIndex in comments) {
+        commentsListElement.appendChild(
           createListElement(comments[commentIndex]));
-    }
-  });
+      }
+      }).catch(dataError => {
+      alert(dataError);
+    });
 }
-/*
-  Returns HTML list element with text 
-*/
+
+/** 
+ * Sends a POST request to DeleteDataServlet to delete all the comments and calls getComments() to
+ * remove the comments from the page
+ */
+function deleteAllComments() {
+  fetch('delete-data', {method: 'POST'}).then(getComments());
+}
+
+/** 
+ * Returns HTML list element with text 
+ */
 function createListElement(text) {
   const liElement = document.createElement('li');
   liElement.innerText = text;
