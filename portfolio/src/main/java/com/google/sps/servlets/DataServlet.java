@@ -55,7 +55,7 @@ public class DataServlet extends HttpServlet {
     try {
       // Get the maximum number of comments to be displayed from the queryString
       limit = Integer.parseInt(request.getParameter("commentsLimit"));
-      if (limit < 0 || limit > MAX_COMMENTS) {
+      if (limit <= 0 || limit > MAX_COMMENTS) {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST, "The number selected is invalid");
       }
     } catch (Exception e) {
