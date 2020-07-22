@@ -78,6 +78,7 @@ function getComments() {
       const commentsListElement = document.getElementById('comments-history');
     
       commentsListElement.innerHTML = '';
+      console.log(comments);
       for (const commentIndex in comments) {
         commentsListElement.appendChild(
           createListElement(comments[commentIndex]));
@@ -104,27 +105,34 @@ function createListElement(text) {
   return liElement;
 }
 
-/**
- * Fetch the login status and unhide the comment form if the user is logged in
- * Otherwise, show a login link
- */
-function updateCommentForm() {
+function updateVisibilityForLoginStatus() {
+  displayElement('commentForm', false);
+  displayElement('loginLink', false);
+  displayElement('logoutLink', false);
+
   fetch('/login-status').then(response => response.text()).then(result => {
     result = result.slice(3, result.length - 5);
+
+     // Get the login status for the user and only show the appropriate bits
     if (result[0] === '1') {
-      // the user is logged in, then unhide commentForm and show logout url
-      document.getElementById('commentForm').style.visibility = 'visible';
-      displayLink("logoutLink");
+      // the user is logged in, then unhide commentForm and the logout url
+      displayElement('commentForm', true);
+      displayElement('logoutLink', true);
     } else {
-      // show login url
-      displayLink("loginLink");
+      // unhide login url
+      displayElement('loginLink', true);
     }
   });
 }
+
 /**
- * unhide urlType: logoutLink or loginLink 
+ * Display the element with id=elementId if isShown === true, otherwise hide it
  */
-function displayLink(urlType) {
-  link = document.getElementById(urlType);
-  link.style.visibility = 'visible';
+function displayElement(elementId, isShown) {
+  element = document.getElementById(elementId);
+  if (isShown === true) {
+    element.style.display = 'block';
+  } else {
+    element.style.display = 'none'; 
+  }
 }

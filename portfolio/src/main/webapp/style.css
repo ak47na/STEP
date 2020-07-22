@@ -9,13 +9,13 @@ input {
 } 
 
 form {
-  visibility: hidden;
+  display: none;
 }
 
 #loginLink {
-  visibility: hidden;
+  display: none;
 }
 
 #logoutLink {
-  visibility: hidden;
+  display: none;
 }
