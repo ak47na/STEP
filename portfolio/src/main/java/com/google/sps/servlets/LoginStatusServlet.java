@@ -41,14 +41,14 @@ public class LoginStatusServlet extends HttpServlet {
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    response.setContentType("text/html");
+    response.setContentType("application/json");
 
     if (userService.isUserLoggedIn()) {
       String userEmail = userService.getCurrentUser().getEmail();
 
-      response.getWriter().println("<p>1 " + userEmail + "</p>");
+      response.getWriter().println("{\n  \"isLoggedIn\": true,\n  \"email\": \"" + userEmail + "\"\n}");
     } else {
-      response.getWriter().println("<p>0</p>");
+      response.getWriter().println("{\n  \"isLoggedIn\": false\n}");
     }
   }
 }
