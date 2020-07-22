@@ -28,9 +28,20 @@ import javax.servlet.http.HttpServletResponse;
  */
 @WebServlet("/login-status")
 public class LoginStatusServlet extends HttpServlet {
+  private static UserService userService;
+  private static String loginUrl;
+  private static String logoutUrl;
+
+  @Override
+  public void init() {
+    userService = UserServiceFactory.getUserService();
+    logoutUrl = userService.createLogoutURL("/");
+    loginUrl = userService.createLoginURL("/");
+  }
+
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    UserService userService = UserServiceFactory.getUserService();
+    response.setContentType("text/html");
 
     if (userService.isUserLoggedIn()) {
       String userEmail = userService.getCurrentUser().getEmail();
