@@ -7,3 +7,15 @@
 input { 
   display: block; 
 } 
+
+form {
+  visibility: hidden;
+}
+
+#loginLink {
+  visibility: hidden;
+}
+
+#logoutLink {
+  visibility: hidden;
+}

@@ -103,3 +103,28 @@ function createListElement(text) {
   liElement.innerText = text;
   return liElement;
 }
+
+/**
+ * Fetch the login status and unhide the comment form if the user is logged in
+ * Otherwise, show a login link
+ */
+function updateCommentForm() {
+  fetch('/login-status').then(response => response.text()).then(result => {
+    result = result.slice(3, result.length - 5);
+    if (result[0] === '1') {
+      // the user is logged in, then unhide commentForm and show logout url
+      document.getElementById('commentForm').style.visibility = 'visible';
+      displayLink("logoutLink");
+    } else {
+      // show login url
+      displayLink("loginLink");
+    }
+  });
+}
+/**
+ * unhide urlType: logoutLink or loginLink 
+ */
+function displayLink(urlType) {
+  link = document.getElementById(urlType);
+  link.style.visibility = 'visible';
+}
