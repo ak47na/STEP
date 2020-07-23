@@ -109,7 +109,6 @@ function updateVisibilityForLoginStatus() {
   displayElement('commentForm', false);
   displayElement('loginLink', false);
   displayElement('logoutLink', false);
-  displayElement('changeNicknameLink', false);
 
   fetch('/login-status').then(response => response.json()).then(loginStatus => {
 
@@ -119,7 +118,6 @@ function updateVisibilityForLoginStatus() {
       // the user is logged in, then unhide commentForm and the logout url
       displayElement('commentForm', true);
       displayElement('logoutLink', true);
-      displayElement('changeNicknameLink', true);
     } else {
       // unhide login url
       displayElement('loginLink', true);
