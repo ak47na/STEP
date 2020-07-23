@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
   </head>
-  <body>
+  <body onload="updateVisibilityForLoginStatus()">
     <div id="content">
       <h1>AnaK's Portfolio</h1>
       
@@ -40,15 +40,17 @@
       
       <p>Choose the maximum number of comments to be displayed:</p>
       <input type="number" id="commentsLimit" name="commentsLimit" min="0" max = "100" onchange="getComments()" >
-      
-      <form action="/data" method="POST">
+      <button onclick="deleteAllComments()">Delete all the comments</button>
+
+      <form action="/data" id="commentForm" method="POST">
       <p>Write a new comment:</p>
       <textarea name="new-comment"></textarea>
 
       <input type="submit" />
       </form>
-      
-      <button onclick="deleteAllComments()">Delete all the comments</button>
+
+      <a id="loginLink" href = "/_ah/login?continue=%2F" title="Login here">Login</a>
+      <a id="logoutLink" href = "/_ah/logout?continue=%2F" title="Logout here">Logout</a>
 
     </div>
   </body>

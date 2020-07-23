@@ -89,7 +89,7 @@ public class DataServlet extends HttpServlet {
     try {
       // Get the maximum number of comments to be displayed from the queryString
       limit = Integer.parseInt(request.getParameter("commentsLimit"));
-      if (limit < 0 || limit > MAX_COMMENTS) {
+      if (limit <= 0 || limit > MAX_COMMENTS) {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST, "The number selected is invalid");
       }
     } catch (Exception e) {
@@ -160,12 +160,12 @@ public class DataServlet extends HttpServlet {
 
     List<String> comments = new ArrayList<>();
     for (Entity comment: results.asIterable()) {
-      comments.add((String)comment.getProperty("message"));
-
-      -- limit;
       if (limit == 0) {
         break;
       }
+      -- limit;
+      
+      comments.add((String)comment.getProperty("message"));
     }
     return comments;
   }
