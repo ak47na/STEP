@@ -17,10 +17,10 @@ package com.google.sps.data;
 public final class Comment {
 
   private final String message;
-  private final String userEmail;
+  private final String userData;
 
-  public Comment (String message, String userEmail) {
+  public Comment (String message, String userData) {
     this.message = message;
-    this.userEmail = userEmail;
+    this.userData = userData;
   }
 }
