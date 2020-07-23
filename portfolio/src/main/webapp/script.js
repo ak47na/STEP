@@ -59,15 +59,6 @@ function getRandomName() {
 
 /**
  * Fetches the last commentsLimit comments from DataServlet and adds them to the DOM as a list.
-<<<<<<< HEAD
-   commentsLimit is selected by the user and sent to the server as parameter in the query string.
- */
-function getComments() {
-  const dataURL = `data?commentsLimit=${document.getElementById('commentsLimit').value}`;
-
-  fetch(dataURL).then(response => response.json()).then((comments) => {
-    const commentsListElement = document.getElementById('comments-history');
-=======
  * commentsLimit is selected by the user and sent to the server as parameter in the query string.
  */
 function getComments() {
@@ -85,9 +76,9 @@ function getComments() {
       }
       }).then(comments => {
       const commentsListElement = document.getElementById('comments-history');
->>>>>>> 9f0e61f7067a3168d39d4b9cbe06c8fb5e59543c
     
       commentsListElement.innerHTML = '';
+      
       for (const commentIndex in comments) {
         commentsListElement.appendChild(
           createListElement(comments[commentIndex]));
@@ -112,4 +103,36 @@ function createListElement(text) {
   const liElement = document.createElement('li');
   liElement.innerText = text;
   return liElement;
+}
+
+function updateVisibilityForLoginStatus() {
+  displayElement('commentForm', false);
+  displayElement('loginLink', false);
+  displayElement('logoutLink', false);
+
+  fetch('/login-status').then(response => response.json()).then(loginStatus => {
+
+    // Get the login status for the user and only show the appropriate bits
+    
+    if (loginStatus.isLoggedIn === true) {
+      // the user is logged in, then unhide commentForm and the logout url
+      displayElement('commentForm', true);
+      displayElement('logoutLink', true);
+    } else {
+      // unhide login url
+      displayElement('loginLink', true);
+    }
+  });
+}
+
+/**
+ * Display the element with id=elementId if isShown === true, otherwise hide it
+ */
+function displayElement(elementId, isShown) {
+  element = document.getElementById(elementId);
+  if (isShown === true) {
+    element.style.display = 'block';
+  } else {
+    element.style.display = 'none'; 
+  }
 }
