@@ -22,6 +22,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
+import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.sps.data.Comment;
@@ -70,7 +71,6 @@ public class DataServlet extends HttpServlet {
     Gson gson = new Gson();
     
     String commentsJson = gson.toJson(getCommentsArray(limit));
-    System.out.println(commentsJson);
     response.setContentType("application/json;");
     response.getWriter().println(commentsJson);
   }
@@ -105,7 +105,13 @@ public class DataServlet extends HttpServlet {
         break;
       }
       -- limit;
-      Comment comment = new Comment((String)entity.getProperty("message"), (String)entity.getProperty("userEmail"));
+      String nickname =  (String)entity.getProperty("userNickname");
+      
+      if (nickname == null) {
+        // if the user has no nickname, use the email address instead 
+        nickname = (String)entity.getProperty("userEmail");
+      }
+      Comment comment = new Comment((String)entity.getProperty("message"), nickname);
       comments.add(comment);
     }
     return comments;
@@ -120,8 +126,12 @@ public class DataServlet extends HttpServlet {
     commentEntity.setProperty("timestamp", timestamp.getTime());
 
     UserService userService = UserServiceFactory.getUserService();
-    String userEmail = userService.getCurrentUser().getEmail();
+    User currentUser = userService.getCurrentUser();
+    String userEmail = currentUser.getEmail();
+    String userId = currentUser.getUserId();
+    
     commentEntity.setProperty("userEmail", userEmail);
+    commentEntity.setProperty("userNickname", getUserNickname(userId));
 
     return commentEntity;
   }
@@ -131,5 +141,19 @@ public class DataServlet extends HttpServlet {
    
     byte[] commentBytes = newComment.getBytes("UTF-8");
     return newComment;
+  }
+
+  private String getUserNickname(String userId) {
+    // TODO[ak47na]: create Nickname class and remove getUserNickname function 
+    Query query = new Query("UserInfo").setFilter(new Query.FilterPredicate("id", Query.FilterOperator.EQUAL, userId));
+    PreparedQuery result = datastore.prepare(query);
+
+    Entity entity = result.asSingleEntity();
+    String nickname = null;
+    if (entity != null) {
+      nickname = (String) entity.getProperty("nickname");
+    }
+
+    return nickname;
   }
 }
