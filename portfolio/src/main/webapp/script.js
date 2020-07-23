@@ -81,7 +81,7 @@ function getComments() {
       console.log(comments);
       for (const commentIndex in comments) {
         commentsListElement.appendChild(
-          createListElement(comments[commentIndex]));
+          createListElement(`${comments[commentIndex].message}: ${comments[commentIndex].userEmail}`));
       }
       }).catch(dataError => {
       alert(dataError);

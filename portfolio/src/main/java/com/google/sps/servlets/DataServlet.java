@@ -14,6 +14,7 @@
 
 package com.google.sps.servlets;
 
+
 import com.google.gson.Gson;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -21,6 +22,9 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
+import com.google.sps.data.Comment;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
@@ -53,7 +57,7 @@ public class DataServlet extends HttpServlet {
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     Integer limit = null;
     try {
-      // Get the maximum number of comments to be displayed from the queryString
+      // Get the maximum number of  to be displayed from the queryString
       limit = Integer.parseInt(request.getParameter("commentsLimit"));
       if (limit <= 0 || limit > MAX_COMMENTS) {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST, "The number selected is invalid");
@@ -64,8 +68,9 @@ public class DataServlet extends HttpServlet {
     }
 
     Gson gson = new Gson();
+    
     String commentsJson = gson.toJson(getCommentsArray(limit));
-
+    System.out.println(commentsJson);
     response.setContentType("application/json;");
     response.getWriter().println(commentsJson);
   }
@@ -91,17 +96,17 @@ public class DataServlet extends HttpServlet {
     response.sendRedirect("/index.html");
   }
 
-  private List<String> getCommentsArray(int limit) {
+  private List<Comment> getCommentsArray(int limit) {
     PreparedQuery results = datastore.prepare(commentsQuery);
 
-    List<String> comments = new ArrayList<>();
-    for (Entity comment: results.asIterable()) {
+    List<Comment> comments = new ArrayList<>();
+    for (Entity entity: results.asIterable()) {
       if (limit == 0) {
         break;
       }
       -- limit;
-      
-      comments.add((String)comment.getProperty("message"));
+      Comment comment = new Comment((String)entity.getProperty("message"), (String)entity.getProperty("userEmail"));
+      comments.add(comment);
     }
     return comments;
   }
@@ -113,6 +118,11 @@ public class DataServlet extends HttpServlet {
 
     Timestamp timestamp = new Timestamp(System.currentTimeMillis());
     commentEntity.setProperty("timestamp", timestamp.getTime());
+
+    UserService userService = UserServiceFactory.getUserService();
+    String userEmail = userService.getCurrentUser().getEmail();
+    commentEntity.setProperty("userEmail", userEmail);
+
     return commentEntity;
   }
   
