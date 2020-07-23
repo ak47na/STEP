@@ -78,6 +78,7 @@ function getComments() {
       const commentsListElement = document.getElementById('comments-history');
     
       commentsListElement.innerHTML = '';
+      console.log(comments);
       for (const commentIndex in comments) {
         commentsListElement.appendChild(
           createListElement(comments[commentIndex]));
@@ -102,4 +103,36 @@ function createListElement(text) {
   const liElement = document.createElement('li');
   liElement.innerText = text;
   return liElement;
+}
+
+function updateVisibilityForLoginStatus() {
+  displayElement('commentForm', false);
+  displayElement('loginLink', false);
+  displayElement('logoutLink', false);
+
+  fetch('/login-status').then(response => response.json()).then(loginStatus => {
+
+    // Get the login status for the user and only show the appropriate bits
+    console.log(loginStatus.isLoggedIn)
+    if (loginStatus.isLoggedIn === true) {
+      // the user is logged in, then unhide commentForm and the logout url
+      displayElement('commentForm', true);
+      displayElement('logoutLink', true);
+    } else {
+      // unhide login url
+      displayElement('loginLink', true);
+    }
+  });
+}
+
+/**
+ * Display the element with id=elementId if isShown === true, otherwise hide it
+ */
+function displayElement(elementId, isShown) {
+  element = document.getElementById(elementId);
+  if (isShown === true) {
+    element.style.display = 'block';
+  } else {
+    element.style.display = 'none'; 
+  }
 }
