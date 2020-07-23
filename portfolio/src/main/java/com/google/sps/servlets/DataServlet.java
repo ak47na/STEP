@@ -57,7 +57,7 @@ public class DataServlet extends HttpServlet {
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     Integer limit = null;
     try {
-      // Get the maximum number of  to be displayed from the queryString
+      // Get the maximum number of comments to be displayed from the queryString
       limit = Integer.parseInt(request.getParameter("commentsLimit"));
       if (limit <= 0 || limit > MAX_COMMENTS) {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST, "The number selected is invalid");
@@ -134,19 +134,5 @@ public class DataServlet extends HttpServlet {
    
     byte[] commentBytes = newComment.getBytes("UTF-8");
     return newComment;
-  }
-
-  private String getUserNickname(String userId) {
-    // TODO[ak47na]: create Nickname class and remove getUserNickname function 
-    Query query = new Query("UserInfo").setFilter(new Query.FilterPredicate("id", Query.FilterOperator.EQUAL, userId));
-    PreparedQuery result = datastore.prepare(query);
-
-    Entity entity = result.asSingleEntity();
-    String nickname = null;
-    if (entity != null) {
-      nickname = (String) entity.getProperty("nickname");
-    }
-
-    return nickname;
   }
 }
