@@ -14,6 +14,7 @@
 
 package com.google.sps.servlets;
 
+
 import com.google.gson.Gson;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -21,7 +22,6 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
-import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.sps.data.Comment;
@@ -57,7 +57,7 @@ public class DataServlet extends HttpServlet {
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     Integer limit = null;
     try {
-      // Get the maximum number of comments to be displayed from the queryString
+      // Get the maximum number of  to be displayed from the queryString
       limit = Integer.parseInt(request.getParameter("commentsLimit"));
       if (limit <= 0 || limit > MAX_COMMENTS) {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST, "The number selected is invalid");
@@ -70,6 +70,7 @@ public class DataServlet extends HttpServlet {
     Gson gson = new Gson();
     
     String commentsJson = gson.toJson(getCommentsArray(limit));
+
     response.setContentType("application/json;");
     response.getWriter().println(commentsJson);
   }
@@ -104,13 +105,9 @@ public class DataServlet extends HttpServlet {
         break;
       }
       -- limit;
-      String nickname =  (String)entity.getProperty("userNickname");
-      
-      if (nickname == null) {
-        // if the user has no nickname, use the email address instead 
-        nickname = (String)entity.getProperty("userEmail");
-      }
-      Comment comment = new Comment((String)entity.getProperty("message"), nickname);
+
+      Comment comment = new Comment((String)entity.getProperty("message"), (String)entity.getProperty("userEmail"));
+
       comments.add(comment);
     }
     return comments;
@@ -125,12 +122,9 @@ public class DataServlet extends HttpServlet {
     commentEntity.setProperty("timestamp", timestamp.getTime());
 
     UserService userService = UserServiceFactory.getUserService();
-    User currentUser = userService.getCurrentUser();
-    String userEmail = currentUser.getEmail();
-    String userId = currentUser.getUserId();
-    
+
+    String userEmail = userService.getCurrentUser().getEmail();
     commentEntity.setProperty("userEmail", userEmail);
-    commentEntity.setProperty("userNickname", getUserNickname(userId));
 
     return commentEntity;
   }

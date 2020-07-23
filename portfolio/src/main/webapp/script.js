@@ -81,7 +81,7 @@ function getComments() {
       
       for (const commentIndex in comments) {
         commentsListElement.appendChild(
-          createListElement(`${comments[commentIndex].message}: ${comments[commentIndex].userData}`));
+          createListElement(`${comments[commentIndex].message}: ${comments[commentIndex].userEmail}`));
       }
       }).catch(dataError => {
       alert(dataError);
