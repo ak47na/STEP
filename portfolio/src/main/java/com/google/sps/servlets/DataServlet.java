@@ -21,6 +21,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
+import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.sps.data.Comment;
@@ -68,7 +69,6 @@ public class DataServlet extends HttpServlet {
     Gson gson = new Gson();
     
     String commentsJson = gson.toJson(getCommentsArray(limit));
-
     response.setContentType("application/json;");
     response.getWriter().println(commentsJson);
   }
@@ -90,9 +90,10 @@ public class DataServlet extends HttpServlet {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     UserService userService = UserServiceFactory.getUserService();
-    String userEmail = userService.getCurrentUser().getEmail();
-    
-    datastore.put(createCommentEntity(newComment, userEmail));
+    User currentUser = userService.getCurrentUser();
+    String userEmail = currentUser.getEmail();
+    String userId = currentUser.getUserId();
+    datastore.put(createCommentEntity(newComment, userEmail, userId));
 
     // Redirect back to the HTML page.
     response.sendRedirect("/index.html");
@@ -138,14 +139,14 @@ public class DataServlet extends HttpServlet {
   }
 
   /** Creates Entity with a kind of Comment */
-  private Entity createCommentEntity(String newComment, String userEmail) {
+  private Entity createCommentEntity(String newComment, String userEmail, String userId) {
     Entity commentEntity = new Entity("Comment");
     commentEntity.setProperty("message", newComment);
 
     Timestamp timestamp = new Timestamp(System.currentTimeMillis());
     commentEntity.setProperty("timestamp", timestamp.getTime());
-
     commentEntity.setProperty("userEmail", userEmail);
+    commentEntity.setProperty("userNickname", getUserNickname(userId));
 
     return commentEntity;
   }
