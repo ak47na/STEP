@@ -90,7 +90,10 @@ public class DataServlet extends HttpServlet {
     }
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    datastore.put(createCommentEntity(newComment));
+    UserService userService = UserServiceFactory.getUserService();
+    String userEmail = userService.getCurrentUser().getEmail();
+    
+    datastore.put(createCommentEntity(newComment, userEmail));
 
     // Redirect back to the HTML page.
     response.sendRedirect("/index.html");
@@ -114,16 +117,13 @@ public class DataServlet extends HttpServlet {
   }
 
   /** Creates Entity with a kind of Comment */
-  private Entity createCommentEntity(String newComment) {
+  private Entity createCommentEntity(String newComment, String userEmail) {
     Entity commentEntity = new Entity("Comment");
     commentEntity.setProperty("message", newComment);
 
     Timestamp timestamp = new Timestamp(System.currentTimeMillis());
     commentEntity.setProperty("timestamp", timestamp.getTime());
 
-    UserService userService = UserServiceFactory.getUserService();
-
-    String userEmail = userService.getCurrentUser().getEmail();
     commentEntity.setProperty("userEmail", userEmail);
 
     return commentEntity;

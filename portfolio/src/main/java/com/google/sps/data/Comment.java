@@ -14,6 +14,7 @@
 
 package com.google.sps.data;
 
+/** Class to store user's website comments. */
 public final class Comment {
 
   private final String message;
