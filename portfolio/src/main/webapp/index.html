@@ -34,6 +34,9 @@
       
       <h1>Comments:</h1>
       <ul id="comments-history"></ul>
+
+      <p>Choose the maximum number of comments to be displayed:</p>
+      <input type="number" id="commentsLimit" name="commentsLimit" min="0" max="20" onchange="getComments()" >
       
       <p>Choose the maximum number of comments to be displayed:</p>
       <input type="number" id="commentsLimit" name="commentsLimit" min="0" max = "100" onchange="getComments()" >
@@ -46,7 +49,6 @@
       <input type="submit" />
       </form>
 
-      <a id="changeNicknameLink" href = "/nickname" title="Change nickname here">Click here to change your nickname</a>
       <a id="loginLink" href = "/_ah/login?continue=%2F" title="Login here">Login</a>
       <a id="logoutLink" href = "/_ah/logout?continue=%2F" title="Logout here">Logout</a>
 

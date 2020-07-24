@@ -39,7 +39,6 @@ import java.nio.charset.StandardCharsets;
 /** Servlet that handles comments data */
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
-  
   public static final int MAX_COMMENTS = 100;
   private DatastoreService datastore;
   private Query commentsQuery;
@@ -89,6 +88,7 @@ public class DataServlet extends HttpServlet {
     }
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+
     UserService userService = UserServiceFactory.getUserService();
     User currentUser = userService.getCurrentUser();
     String userEmail = currentUser.getEmail();
@@ -97,6 +97,24 @@ public class DataServlet extends HttpServlet {
 
     // Redirect back to the HTML page.
     response.sendRedirect("/index.html");
+  }
+  /*
+    Get the maximum number of comments to be displayed from the queryString
+  */
+  private String getCommentsLimit(HttpServletRequest request) {
+    if (request.getQueryString() == null) {
+      return "5";
+    }
+    String[] queryStringArray = request.getQueryString().split("&");
+
+    for (String keyValuePair : queryStringArray) {
+      String[] keyValuePairArray = keyValuePair.split("=");
+      if (keyValuePairArray[0].equals("commentsLimit")) {
+        return keyValuePairArray[1];
+      }
+    }
+    // return default value if none was provided
+    return "5";
   }
 
   private List<Comment> getCommentsArray(int limit) {
@@ -127,7 +145,6 @@ public class DataServlet extends HttpServlet {
 
     Timestamp timestamp = new Timestamp(System.currentTimeMillis());
     commentEntity.setProperty("timestamp", timestamp.getTime());
-    
     commentEntity.setProperty("userEmail", userEmail);
     commentEntity.setProperty("userNickname", getUserNickname(userId));
 
@@ -139,19 +156,5 @@ public class DataServlet extends HttpServlet {
    
     byte[] commentBytes = newComment.getBytes("UTF-8");
     return newComment;
-  }
-
-  private String getUserNickname(String userId) {
-    // TODO[ak47na]: create Nickname class and remove getUserNickname function 
-    Query query = new Query("UserInfo").setFilter(new Query.FilterPredicate("id", Query.FilterOperator.EQUAL, userId));
-    PreparedQuery result = datastore.prepare(query);
-
-    Entity entity = result.asSingleEntity();
-    String nickname = null;
-    if (entity != null) {
-      nickname = (String) entity.getProperty("nickname");
-    }
-
-    return nickname;
   }
 }
