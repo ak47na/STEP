@@ -34,6 +34,7 @@ import java.nio.charset.StandardCharsets;
 public class DeleteDataServlet extends HttpServlet {
   /**
    * Delete all the comments from datastore  
+   * TODO[ak47na]: only allow admin users to delete data
    */
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {

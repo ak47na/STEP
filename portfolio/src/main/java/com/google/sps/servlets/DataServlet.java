@@ -14,10 +14,6 @@
 
 package com.google.sps.servlets;
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 9f0e61f7067a3168d39d4b9cbe06c8fb5e59543c
 import com.google.gson.Gson;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -25,6 +21,9 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
+import com.google.sps.data.Comment;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
@@ -39,37 +38,6 @@ import java.nio.charset.StandardCharsets;
 /** Servlet that handles comments data */
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
-<<<<<<< HEAD
-  /*
-    Send at most commentsLimit comments back to the browser
-  */
-  @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
-    PreparedQuery results = datastore.prepare(query);
-   
-    int limit;
-    try {
-      limit = Integer.parseInt(getCommentsLimit(request));
-    } catch (Exception e)
-    {
-        // if data selected by user is invalid, use default value
-        limit = 5;
-    }
-
-    List<String> comments = new ArrayList<>();
-    for (Entity comment: results.asIterable()) {
-      comments.add((String)comment.getProperty("message"));
-
-      -- limit;
-      if (limit == 0) {
-        break;
-      }
-    }
-    
-=======
-  
   public static final int MAX_COMMENTS = 100;
   private DatastoreService datastore;
   private Query commentsQuery;
@@ -97,8 +65,8 @@ public class DataServlet extends HttpServlet {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
     }
 
->>>>>>> 9f0e61f7067a3168d39d4b9cbe06c8fb5e59543c
     Gson gson = new Gson();
+    
     String commentsJson = gson.toJson(getCommentsArray(limit));
 
     response.setContentType("application/json;");
@@ -118,20 +86,13 @@ public class DataServlet extends HttpServlet {
       // Send a HTTP 500 error for other exceptions
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
     }
-<<<<<<< HEAD
-    Entity commentEntity = new Entity("Comment");
-    commentEntity.setProperty("message", newComment);
-
-    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-    commentEntity.setProperty("timestamp", timestamp.getTime());
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    datastore.put(commentEntity);
-=======
 
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    datastore.put(createCommentEntity(newComment));
->>>>>>> 9f0e61f7067a3168d39d4b9cbe06c8fb5e59543c
+    UserService userService = UserServiceFactory.getUserService();
+    String userEmail = userService.getCurrentUser().getEmail();
+    
+    datastore.put(createCommentEntity(newComment, userEmail));
 
     // Redirect back to the HTML page.
     response.sendRedirect("/index.html");
@@ -155,28 +116,33 @@ public class DataServlet extends HttpServlet {
     return "5";
   }
 
-  private List<String> getCommentsArray(int limit) {
+  private List<Comment> getCommentsArray(int limit) {
     PreparedQuery results = datastore.prepare(commentsQuery);
 
-    List<String> comments = new ArrayList<>();
-    for (Entity comment: results.asIterable()) {
+    List<Comment> comments = new ArrayList<>();
+    for (Entity entity: results.asIterable()) {
       if (limit == 0) {
         break;
       }
       -- limit;
-      
-      comments.add((String)comment.getProperty("message"));
+
+      Comment comment = new Comment((String)entity.getProperty("message"), (String)entity.getProperty("userEmail"));
+
+      comments.add(comment);
     }
     return comments;
   }
 
   /** Creates Entity with a kind of Comment */
-  private Entity createCommentEntity(String newComment) {
+  private Entity createCommentEntity(String newComment, String userEmail) {
     Entity commentEntity = new Entity("Comment");
     commentEntity.setProperty("message", newComment);
 
     Timestamp timestamp = new Timestamp(System.currentTimeMillis());
     commentEntity.setProperty("timestamp", timestamp.getTime());
+
+    commentEntity.setProperty("userEmail", userEmail);
+
     return commentEntity;
   }
   

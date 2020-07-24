@@ -35,7 +35,9 @@ public class LoginStatusServlet extends HttpServlet {
   @Override
   public void init() {
     userService = UserServiceFactory.getUserService();
+    // create a logout url and return to main page after the user has logged out
     logoutUrl = userService.createLogoutURL("/");
+    // create a login url and return to main page after the user has logged in
     loginUrl = userService.createLoginURL("/");
   }
 
