@@ -104,7 +104,7 @@ public class DataServlet extends HttpServlet {
         break;
       }
       -- limit;
-      String nickname =  (String)entity.getProperty("userNickname");
+      String nickname = (String)entity.getProperty("userNickname");
       
       if (nickname == null) {
         // if the user has no nickname, use the email address instead 
