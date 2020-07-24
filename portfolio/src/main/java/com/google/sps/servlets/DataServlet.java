@@ -117,7 +117,7 @@ public class DataServlet extends HttpServlet {
     return "5";
   }
 
-  private List<Comment> getCommentsArray(int limit) {
+  private List<Comment> getCommentsArray(int limit) throws IOException {
     PreparedQuery results = datastore.prepare(commentsQuery);
 
     List<Comment> comments = new ArrayList<>();
@@ -156,5 +156,19 @@ public class DataServlet extends HttpServlet {
    
     byte[] commentBytes = newComment.getBytes("UTF-8");
     return newComment;
+  }
+
+  // TODO[ak47na]: create Nickname class and remove duplicate getUserNickname
+  private String getUserNickname(String userId) {
+    Query query = new Query("UserInfo").setFilter(new Query.FilterPredicate("id", Query.FilterOperator.EQUAL, userId));
+    PreparedQuery result = datastore.prepare(query);
+
+    Entity entity = result.asSingleEntity();
+    String nickname = null;
+    if (entity != null) {
+      nickname = (String) entity.getProperty("nickname");
+    }
+
+    return nickname;
   }
 }

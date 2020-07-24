@@ -14,14 +14,31 @@
 
 package com.google.sps.data;
 
+import com.google.cloud.language.v1.Document;
+import com.google.cloud.language.v1.LanguageServiceClient;
+import com.google.cloud.language.v1.Sentiment;
+import java.io.IOException;
+
 /** Class to store user's website comments. */
 public final class Comment {
 
   private final String message;
   private final String userData;
+  private final float score;
 
-  public Comment (String message, String userData) {
+  public Comment(String message, String userData) throws IOException {
     this.message = message;
     this.userData = userData;
+    this.score = getMessageScore(message);
+  }
+
+  private float getMessageScore(String message) throws IOException {
+    Document doc = Document.newBuilder().setContent(message).setType(Document.Type.PLAIN_TEXT).build();
+    LanguageServiceClient languageService = LanguageServiceClient.create();
+    Sentiment sentiment = languageService.analyzeSentiment(doc).getDocumentSentiment();
+    float score = sentiment.getScore();
+    languageService.close();
+
+    return score;
   }
 }
