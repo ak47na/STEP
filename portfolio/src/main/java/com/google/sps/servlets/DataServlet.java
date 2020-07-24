@@ -125,9 +125,13 @@ public class DataServlet extends HttpServlet {
         break;
       }
       -- limit;
-
-      Comment comment = new Comment((String)entity.getProperty("message"), (String)entity.getProperty("userEmail"));
-
+      String nickname = (String)entity.getProperty("userNickname");
+      
+      if (nickname == null) {
+        // if the user has no nickname, use the email address instead 
+        nickname = (String)entity.getProperty("userEmail");
+      }
+      Comment comment = new Comment((String)entity.getProperty("message"), nickname);
       comments.add(comment);
     }
     return comments;
