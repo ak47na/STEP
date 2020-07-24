@@ -78,10 +78,10 @@ function getComments() {
       const commentsListElement = document.getElementById('comments-history');
     
       commentsListElement.innerHTML = '';
-      
+
       for (const commentIndex in comments) {
         commentsListElement.appendChild(
-          createListElement(`${comments[commentIndex].message}: ${comments[commentIndex].userData}`));
+          createListElement(`${comments[commentIndex].message}: ${comments[commentIndex].userEmail}`));
       }
       }).catch(dataError => {
       alert(dataError);
@@ -109,17 +109,14 @@ function updateVisibilityForLoginStatus() {
   displayElement('commentForm', false);
   displayElement('loginLink', false);
   displayElement('logoutLink', false);
-  displayElement('changeNicknameLink', false);
 
   fetch('/login-status').then(response => response.json()).then(loginStatus => {
 
     // Get the login status for the user and only show the appropriate bits
-    
     if (loginStatus.isLoggedIn === true) {
       // the user is logged in, then unhide commentForm and the logout url
       displayElement('commentForm', true);
       displayElement('logoutLink', true);
-      displayElement('changeNicknameLink', true);
     } else {
       // unhide login url
       displayElement('loginLink', true);

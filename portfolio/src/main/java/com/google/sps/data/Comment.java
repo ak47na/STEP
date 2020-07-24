@@ -14,13 +14,14 @@
 
 package com.google.sps.data;
 
+/** Class to store user's website comments. */
 public final class Comment {
 
   private final String message;
-  private final String userData;
+  private final String userEmail;
 
-  public Comment (String message, String userData) {
+  public Comment (String message, String userEmail) {
     this.message = message;
-    this.userData = userData;
+    this.userEmail = userEmail;
   }
 }
