@@ -14,7 +14,6 @@
 
 package com.google.sps.servlets;
 
-
 import com.google.gson.Gson;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -22,10 +21,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
-<<<<<<< HEAD
 import com.google.appengine.api.users.User;
-=======
->>>>>>> af51060... change Comment list to show for each comment, the email address of the user who posted it
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.sps.data.Comment;
@@ -61,7 +57,7 @@ public class DataServlet extends HttpServlet {
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     Integer limit = null;
     try {
-      // Get the maximum number of  to be displayed from the queryString
+      // Get the maximum number of comments to be displayed from the queryString
       limit = Integer.parseInt(request.getParameter("commentsLimit"));
       if (limit <= 0 || limit > MAX_COMMENTS) {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST, "The number selected is invalid");
@@ -108,8 +104,7 @@ public class DataServlet extends HttpServlet {
         break;
       }
       -- limit;
-
-      String nickname =  (String)entity.getProperty("userNickname");
+      String nickname = (String)entity.getProperty("userNickname");
       
       if (nickname == null) {
         // if the user has no nickname, use the email address instead 
@@ -130,7 +125,6 @@ public class DataServlet extends HttpServlet {
     commentEntity.setProperty("timestamp", timestamp.getTime());
 
     UserService userService = UserServiceFactory.getUserService();
-
     User currentUser = userService.getCurrentUser();
     String userEmail = currentUser.getEmail();
     String userId = currentUser.getUserId();
