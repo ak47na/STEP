@@ -116,9 +116,11 @@ function updateVisibilityForLoginStatus() {
     if (loginStatus.isLoggedIn === true) {
       // the user is logged in, then unhide commentForm and the logout url
       displayElement('commentForm', true);
+      updateLink('logoutLink', loginStatus.logoutLink);
       displayElement('logoutLink', true);
     } else {
       // unhide login url
+      updateLink('loginLink', loginStatus.loginLink);
       displayElement('loginLink', true);
     }
   });
@@ -134,4 +136,13 @@ function displayElement(elementId, isShown) {
   } else {
     element.style.display = 'none'; 
   }
+}
+
+/**
+ * Display the element with id=elementId if isShown === true, otherwise hide it
+ */
+function updateLink(elementId, link) {
+  element = document.getElementById(elementId);
+
+  element.setAttribute("href", link);
 }
