@@ -80,8 +80,13 @@ function getComments() {
       commentsListElement.innerHTML = '';
 
       for (const commentIndex in comments) {
+        messageAndScore = `${comments[commentIndex].message}(${comments[commentIndex].score})`;
+        // display the message, the sentiment score and the nickname/email of the user in format:
+        // message(sentiment score) : nickname 
+        // TODO[ak47na]: display the sentiment score in a more descriptive way
+          
         commentsListElement.appendChild(
-          createListElement(`${comments[commentIndex].message}: ${comments[commentIndex].userData}`));
+          createListElement(`${messageAndScore}: ${comments[commentIndex].userData}`));
       }
       }).catch(dataError => {
       alert(dataError);
