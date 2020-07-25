@@ -139,10 +139,9 @@ function displayElement(elementId, isShown) {
 }
 
 /**
- * Display the element with id=elementId if isShown === true, otherwise hide it
+ * Update the element with id=elementId to link to link
  */
 function updateLink(elementId, link) {
   element = document.getElementById(elementId);
-
   element.setAttribute("href", link);
 }
