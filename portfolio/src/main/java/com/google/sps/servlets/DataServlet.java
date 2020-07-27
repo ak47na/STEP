@@ -157,4 +157,17 @@ public class DataServlet extends HttpServlet {
     byte[] commentBytes = newComment.getBytes("UTF-8");
     return newComment;
   }
+  
+  private String getUserNickname(String userId) {
+    Query query = new Query("UserInfo").setFilter(new Query.FilterPredicate("id", Query.FilterOperator.EQUAL, userId));
+    PreparedQuery result = datastore.prepare(query);
+
+    Entity entity = result.asSingleEntity();
+    String nickname = null;
+    if (entity != null) {
+      nickname = (String) entity.getProperty("nickname");
+    }
+
+    return nickname;
+  }
 }
