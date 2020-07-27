@@ -31,14 +31,20 @@ public final class Comment {
     this.userData = userData;
     this.score = getMessageScore(message);
   }
-
+  /** 
+   * Returns the sentiment score(between -1.0 and 1.0) of the message
+   */
   private float getMessageScore(String message) throws IOException {
-    Document doc = Document.newBuilder().setContent(message).setType(Document.Type.PLAIN_TEXT).build();
-    LanguageServiceClient languageService = LanguageServiceClient.create();
-    Sentiment sentiment = languageService.analyzeSentiment(doc).getDocumentSentiment();
-    float score = sentiment.getScore();
-    languageService.close();
-
-    return score;
+    //instantiate the Language client to apply sentiment analysis on the text of message
+    //LanguageServiceClient.create() throws IOException 
+    try (LanguageServiceClient language = LanguageServiceClient.create()) {
+      Document doc = Document.newBuilder().setContent(message).setType(Document.Type.PLAIN_TEXT).build();
+      LanguageServiceClient languageService = LanguageServiceClient.create();
+      Sentiment sentiment = languageService.analyzeSentiment(doc).getDocumentSentiment();
+      if (sentiment == null)
+        // no sentiment was found
+        return 0;
+      return sentiment.getScore();
+    }
   }
 }
