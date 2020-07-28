@@ -39,10 +39,12 @@
       <input type="number" id="commentsLimit" name="commentsLimit" min="0" max = "100" onchange="getComments()" >
       <button onclick="deleteAllComments()">Delete all the comments</button>
 
-      <form action="/data" id="commentForm" method="POST">
+      <form id="commentForm" method="POST">
       <p>Write a new comment:</p>
       <textarea name="new-comment"></textarea>
 
+      <p>Uload an image:</p>
+      <input type="file" name="image">
       <input type="submit" />
       </form>
 
