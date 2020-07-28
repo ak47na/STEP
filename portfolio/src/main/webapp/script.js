@@ -130,7 +130,7 @@ function updateVisibilityForLoginStatus() {
 
 /**
  * Fetch BlobUploadUrl from BlobstoreUploadServlet and set it as the action for the comment form
- * When the form is submited, the request goes to Blobstore which handles the image upload
+ * When the form is submitted, the request goes to Blobstore which handles the image upload
  * Then, Blobstore forwards the request to DataServlet
  */
 function fetchBlobstoreUrlAndSetFormAction(commentFormId) {
