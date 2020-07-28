@@ -33,10 +33,10 @@ public final class Comment {
   }
   /** 
    * Returns the sentiment score(between -1.0 and 1.0) of the message
+   * @throws {IOException} if it fails to establish connection to LanguageService
    */
   private float getMessageScore(String message) throws IOException {
     //instantiate the Language client to apply sentiment analysis on the text of message
-    //LanguageServiceClient.create() throws IOException 
     try (LanguageServiceClient language = LanguageServiceClient.create()) {
       Document doc = Document.newBuilder().setContent(message).setType(Document.Type.PLAIN_TEXT).build();
       LanguageServiceClient languageService = LanguageServiceClient.create();
