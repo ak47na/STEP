@@ -80,8 +80,13 @@ function getComments() {
       commentsListElement.innerHTML = '';
 
       for (const commentIndex in comments) {
+        messageAndScore = `${comments[commentIndex].message}(${comments[commentIndex].score})`;
+        // display the message, the sentiment score and the nickname/email of the user in format:
+        // message(sentiment score) : nickname 
+        // TODO[ak47na]: display the sentiment score in a more descriptive way
+          
         commentsListElement.appendChild(
-          createListElement(`${comments[commentIndex].message}: ${comments[commentIndex].userData}`));
+          createListElement(`${messageAndScore}: ${comments[commentIndex].userData}`));
       }
       }).catch(dataError => {
       alert(dataError);
@@ -109,6 +114,7 @@ function updateVisibilityForLoginStatus() {
   displayElement('commentForm', false);
   displayElement('loginLink', false);
   displayElement('logoutLink', false);
+  displayElement('changeNicknameLink', false);
 
   fetch('/login-status').then(response => response.json()).then(loginStatus => {
 
@@ -120,6 +126,7 @@ function updateVisibilityForLoginStatus() {
       fetchBlobstoreUrlAndSetFormAction('commentForm');
       updateLink('logoutLink', loginStatus.logoutLink);
       displayElement('logoutLink', true);
+      displayElement('changeNicknameLink', true);
     } else {
       // unhide login url
       updateLink('loginLink', loginStatus.loginLink);

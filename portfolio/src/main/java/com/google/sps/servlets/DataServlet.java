@@ -147,7 +147,7 @@ public class DataServlet extends HttpServlet {
   private String getUserNickname(String userId) {
     Query query = new Query("UserInfo").setFilter(new Query.FilterPredicate("id", Query.FilterOperator.EQUAL, userId));
     PreparedQuery result = datastore.prepare(query);
-    
+
     Entity entity = result.asSingleEntity();
     String nickname = null;
     if (entity != null) {
