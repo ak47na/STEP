@@ -117,7 +117,7 @@ function updateVisibilityForLoginStatus() {
       // the user is logged in, then unhide commentForm and the logout url
       displayElement('commentForm', true);
       //when commentForm is displayed, its action should be updated to the Blobstore URL
-      fetchBlobstoreUrl();
+      fetchBlobstoreUrlAndSetFormAction('commentForm');
       updateLink('logoutLink', loginStatus.logoutLink);
       displayElement('logoutLink', true);
     } else {
@@ -130,10 +130,12 @@ function updateVisibilityForLoginStatus() {
 
 /**
  * Fetch BlobUploadUrl from BlobstoreUploadServlet and set it as the action for the comment form
+ * When the form is submited, the request goes to Blobstore which handles the image upload
+ * Then, Blobstore forwards the request to DataServlet
  */
-function fetchBlobstoreUrl(commentFormId) {
+function fetchBlobstoreUrlAndSetFormAction(commentFormId) {
   fetch('/blobstore-upload-url').then(response => response.text()).then(BlobUploadUrl => {
-    commentForm = document.getElementById(commentFormId);
+    const commentForm = document.getElementById(commentFormId);
     commentForm.action = BlobUploadUrl;
   });
 }
