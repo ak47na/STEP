@@ -116,6 +116,8 @@ function updateVisibilityForLoginStatus() {
     if (loginStatus.isLoggedIn === true) {
       // the user is logged in, then unhide commentForm and the logout url
       displayElement('commentForm', true);
+      //when commentForm is displayed, its action should be updated to the Blobstore URL
+      fetchBlobstoreUrl();
       updateLink('logoutLink', loginStatus.logoutLink);
       displayElement('logoutLink', true);
     } else {
@@ -123,6 +125,16 @@ function updateVisibilityForLoginStatus() {
       updateLink('loginLink', loginStatus.loginLink);
       displayElement('loginLink', true);
     }
+  });
+}
+
+/**
+ * Fetch BlobUploadUrl from BlobstoreUploadServlet and set it as the action for the comment form
+ */
+function fetchBlobstoreUrl(commentFormId) {
+  fetch('/blobstore-upload-url').then(response => response.text()).then(BlobUploadUrl => {
+    commentForm = document.getElementById(commentFormId);
+    commentForm.action = BlobUploadUrl;
   });
 }
 
