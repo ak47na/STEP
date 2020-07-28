@@ -25,6 +25,9 @@ import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.sps.data.Comment;
+
+// todo: create nickname class that returns the nickname given the id and use it in both 
+// DataServlet and NicknameServlet
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
@@ -39,12 +42,16 @@ import java.nio.charset.StandardCharsets;
 /** Servlet that handles comments data */
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
+  
   public static final int MAX_COMMENTS = 100;
   private DatastoreService datastore;
   private Query commentsQuery;
+  private UserService userService; 
+
   /** Initializes data needed to load comments from datastore when requested */
   @Override
   public void init() {
+    userService = UserServiceFactory.getUserService();
     datastore = DatastoreServiceFactory.getDatastoreService();
     commentsQuery = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
   }
@@ -87,9 +94,6 @@ public class DataServlet extends HttpServlet {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
     }
 
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-
-    UserService userService = UserServiceFactory.getUserService();
     User currentUser = userService.getCurrentUser();
     String userEmail = currentUser.getEmail();
     String userId = currentUser.getUserId();
@@ -98,26 +102,9 @@ public class DataServlet extends HttpServlet {
     // Redirect back to the HTML page.
     response.sendRedirect("/index.html");
   }
-  /*
-    Get the maximum number of comments to be displayed from the queryString
-  */
-  private String getCommentsLimit(HttpServletRequest request) {
-    if (request.getQueryString() == null) {
-      return "5";
-    }
-    String[] queryStringArray = request.getQueryString().split("&");
 
-    for (String keyValuePair : queryStringArray) {
-      String[] keyValuePairArray = keyValuePair.split("=");
-      if (keyValuePairArray[0].equals("commentsLimit")) {
-        return keyValuePairArray[1];
-      }
-    }
-    // return default value if none was provided
-    return "5";
-  }
-
-  private List<Comment> getCommentsArray(int limit) throws IOException {
+  /** Returns an array with at most limit Comment objects */
+  private List<Comment> getCommentsArray(int limit) {
     PreparedQuery results = datastore.prepare(commentsQuery);
 
     List<Comment> comments = new ArrayList<>();
@@ -127,9 +114,7 @@ public class DataServlet extends HttpServlet {
       }
       -- limit;
       String nickname = (String)entity.getProperty("userNickname");
-      
       if (nickname == null) {
-        // if the user has no nickname, use the email address instead 
         nickname = (String)entity.getProperty("userEmail");
       }
       Comment comment = new Comment((String)entity.getProperty("message"), nickname);
@@ -158,7 +143,7 @@ public class DataServlet extends HttpServlet {
     return newComment;
   }
 
-  // TODO[ak47na]: create Nickname class and remove duplicate getUserNickname
+  /** Returns the nickname of the user or null if no nickname was set by the user */
   private String getUserNickname(String userId) {
     Query query = new Query("UserInfo").setFilter(new Query.FilterPredicate("id", Query.FilterOperator.EQUAL, userId));
     PreparedQuery result = datastore.prepare(query);
