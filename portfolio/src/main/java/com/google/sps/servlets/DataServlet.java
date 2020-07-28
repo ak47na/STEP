@@ -14,7 +14,6 @@
 
 package com.google.sps.servlets;
 
-
 import com.google.gson.Gson;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -27,7 +26,8 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.sps.data.Comment;
 
-// todo: create nickname class that return nickname given the id and use it in both servlets
+// todo: create nickname class that returns the nickname given the id and use it in both 
+// DataServlet and NicknameServlet
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
