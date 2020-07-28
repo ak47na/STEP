@@ -153,7 +153,6 @@ public class DataServlet extends HttpServlet {
     if (entity != null) {
       nickname = (String) entity.getProperty("nickname");
     }
-    System.out.println("nickname");
 
     return nickname;
   }
