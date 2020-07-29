@@ -110,23 +110,16 @@ public class DataServlet extends HttpServlet {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
     }
 
-    User currentUser = userService.getCurrentUser();
-    String userEmail = currentUser.getEmail();
-    String userId = currentUser.getUserId();
-    datastore.put(createCommentEntity(newComment, userEmail, userId));
     String imageUrl = getUploadedFileUrl(request, "image", "image/");
+    if (imageUrl != null || newComment != null) {
+      User currentUser = userService.getCurrentUser();
+      String userEmail = currentUser.getEmail();
+      String userId = currentUser.getUserId();
+      datastore.put(createCommentEntity(newComment, userEmail, userId, imageUrl));
+    }
 
-    response.setContentType("text/html");
-
-    // Forward response to the HTML page.
-    
-    PrintWriter out = response.getWriter();
-    out.println("<p>Here's the image you uploaded:</p>");
-    out.println("<a href=\"" + imageUrl + "\">");
-    out.println("<img src=\"" + imageUrl + "\" />");
-    out.println("</a>");
-    RequestDispatcher requestDispatcher = request.getRequestDispatcher("index.html");
-    requestDispatcher.forward(request, response);
+    // Redirect to the HTML page.
+    response.sendRedirect("/index.html");
   }
 
   /** Returns a URL that points to the uploaded file, or null if the user didn't upload a file of 
@@ -185,22 +178,25 @@ public class DataServlet extends HttpServlet {
       if (nickname == null) {
         nickname = (String)entity.getProperty("userEmail");
       }
-      Comment comment = new Comment((String)entity.getProperty("message"), nickname);
+      String imageUrl = (String)entity.getProperty("imageUrl");
+      Comment comment = new Comment((String)entity.getProperty("message"), nickname, imageUrl);
+      
       comments.add(comment);
     }
+
     return comments;
   }
 
   /** Creates Entity with a kind of Comment */
-  private Entity createCommentEntity(String newComment, String userEmail, String userId) {
+  private Entity createCommentEntity(String newComment, String userEmail, String userId, String imageUrl) {
     Entity commentEntity = new Entity("Comment");
-    commentEntity.setProperty("message", newComment);
-
     Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+
+    commentEntity.setProperty("message", newComment);
     commentEntity.setProperty("timestamp", timestamp.getTime());
     commentEntity.setProperty("userEmail", userEmail);
     commentEntity.setProperty("userNickname", getUserNickname(userId));
-
+    commentEntity.setProperty("imageUrl", imageUrl);
     return commentEntity;
   }
   

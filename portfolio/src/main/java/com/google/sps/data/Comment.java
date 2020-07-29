@@ -24,11 +24,13 @@ public final class Comment {
 
   private final String message;
   private final String userData;
+  private final String imageUrl;
   private final float score;
 
-  public Comment(String message, String userData) throws IOException {
+  public Comment(String message, String userData, String imageUrl) throws IOException {
     this.message = message;
     this.userData = userData;
+    this.imageUrl = imageUrl;
     this.score = getMessageScore(message);
   }
   /** 
