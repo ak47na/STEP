@@ -118,8 +118,8 @@ function createListElement(text) {
 /** 
  * Returns HTML image element from Url 
  */
-function createImageElement(Url) {
-  if (Url === null || Url === undefined) 
+function createImageElement(url) {
+  if (!url) 
     return null;
   const imgElement = document.createElement('img');
   imgElement.src = Url;
