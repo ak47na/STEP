@@ -98,6 +98,7 @@ public class DataServlet extends HttpServlet {
 
   /**
    * Handles POST requests submitted by commentForm when comments(message and/or image file) are posted
+   * The comments are stored in a datastore and retrieved in the doGet method
    */
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
