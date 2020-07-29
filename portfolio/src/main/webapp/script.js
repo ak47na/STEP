@@ -89,7 +89,7 @@ function getComments() {
         imageElement = createImageElement(comments[commentIndex].imageUrl);
         // if the comment contains an image add it to the message
         if (imageElement !== null) 
-          commentItem.appendChild(createImageElement(imageUrl));
+          commentItem.appendChild(imageElement);
         
         commentsListElement.appendChild(commentItem);
       }
