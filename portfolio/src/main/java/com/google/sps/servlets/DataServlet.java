@@ -114,26 +114,28 @@ public class DataServlet extends HttpServlet {
     String userEmail = currentUser.getEmail();
     String userId = currentUser.getUserId();
     datastore.put(createCommentEntity(newComment, userEmail, userId));
-    String imageUrl = getUploadedFileUrl(request, "image");
+    String imageUrl = getUploadedFileUrl(request, "image", "image/");
 
     response.setContentType("text/html");
+
+    // Forward response to the HTML page.
+    
     PrintWriter out = response.getWriter();
     out.println("<p>Here's the image you uploaded:</p>");
     out.println("<a href=\"" + imageUrl + "\">");
     out.println("<img src=\"" + imageUrl + "\" />");
     out.println("</a>");
-    System.out.println(imageUrl);
-
-    // Redirect back to the HTML page.
-    RequestDispatcher requestDispatcher = request.getRequestDispatcher("index/html");
-    requestDispatcher.include(request, response);
+    RequestDispatcher requestDispatcher = request.getRequestDispatcher("index.html");
+    requestDispatcher.forward(request, response);
   }
 
-  /** Returns a URL that points to the uploaded file, or null if the user didn't upload a file. */
-  private String getUploadedFileUrl(HttpServletRequest request, String formInputElementName) {
+  /** Returns a URL that points to the uploaded file, or null if the user didn't upload a file of 
+   *  type contentType. 
+   */
+  private String getUploadedFileUrl(HttpServletRequest request, String formInputElementName, String contentType) {
     BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
-    // getUploads returns the BlobKey for any files that were uploaded, keyed by the "name" field 
-    // of the upload form.
+    // getUploads returns Map with values as List of BlobKey for any files that were uploaded,
+    // keyed by the "name" field of the uploaded form.
     Map<String, List<BlobKey>> blobs = blobstoreService.getUploads(request);
     List<BlobKey> blobKeys = blobs.get("image");
 
@@ -151,9 +153,8 @@ public class DataServlet extends HttpServlet {
       blobstoreService.delete(blobKey);
       return null;
     }
-
-    // check that the user submitted an image file
-    if (!blobInfo.getContentType().contains("image/")) {
+    // check that the user submitted a file of type contentType
+    if (!blobInfo.getContentType().contains(contentType)) {
       return null;
     }
 
@@ -161,10 +162,8 @@ public class DataServlet extends HttpServlet {
     ImagesService imagesService = ImagesServiceFactory.getImagesService();
     ServingUrlOptions options = ServingUrlOptions.Builder.withBlobKey(blobKey);
 
-    // To support running in Google Cloud Shell with AppEngine's devserver, we must use the relative
-    // path to the image, rather than the path returned by imagesService which contains a host.
     try {
-      //obtains a URL that can dynamically serve the image stored as a blob.
+      //obtains a URL (which contains a host) that can dynamically serve the image stored as blob.
       URL url = new URL(imagesService.getServingUrl(options));
       return url.getPath();
     } catch (MalformedURLException e) {
