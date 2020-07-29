@@ -84,9 +84,14 @@ function getComments() {
         // display the message, the sentiment score and the nickname/email of the user in format:
         // message(sentiment score) : nickname 
         // TODO[ak47na]: display the sentiment score in a more descriptive way
-          
-        commentsListElement.appendChild(
-          createListElement(`${messageAndScore}: ${comments[commentIndex].userData}`));
+
+        commentItem = createListElement(`${messageAndScore}: ${comments[commentIndex].userData}`);
+        imageElement = createImageElement(comments[commentIndex].imageUrl);
+        // if the comment contains an image add it to the message
+        if (imageElement !== null) 
+          commentItem.appendChild(imageElement);
+        
+        commentsListElement.appendChild(commentItem);
       }
       }).catch(dataError => {
       alert(dataError);
@@ -108,6 +113,17 @@ function createListElement(text) {
   const liElement = document.createElement('li');
   liElement.innerText = text;
   return liElement;
+}
+
+/** 
+ * Returns HTML image element from Url 
+ */
+function createImageElement(url) {
+  if (!url) 
+    return null;
+  const imgElement = document.createElement('img');
+  imgElement.src = Url;
+  return imgElement;
 }
 
 function updateVisibilityForLoginStatus() {
