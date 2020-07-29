@@ -96,6 +96,9 @@ public class DataServlet extends HttpServlet {
     response.getWriter().println(commentsJson);
   }
 
+  /**
+   * Handles POST requests submitted by commentForm when comments(message and/or image file) are posted
+   */
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     // Get the comment from the form
