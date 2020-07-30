@@ -31,7 +31,7 @@ public final class FindMeetingQuery {
   }
 
   /** returns a Collection of time ranges when meeting {@code request} can be scheduled in the day of 
-    * {@code events} so that all attendees are free */
+    * events so that all attendees are free */
   public Collection<TimeRange> query(Collection<Event> events, MeetingRequest request) {
 
     if (request.getDuration() > TimeRange.WHOLE_DAY.duration()) {
