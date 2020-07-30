@@ -14,10 +14,74 @@
 
 package com.google.sps;
 
+import java.io.*;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.ArrayList;
+
 
 public final class FindMeetingQuery {
+  // array representing the number of meetings happening during that minute
+  private ArrayList<Integer> meetings;
+
+  public FindMeetingQuery() {
+    meetings = new ArrayList<Integer>();
+    //before processing the events, the number of meetings for each minute is 0
+    meetings.addAll(Collections.nCopies(TimeRange.END_OF_DAY + 2, 0));
+  }
+
+  /** returns a Collection of time ranges when meeting {@code request} can be scheduled in the day of 
+    * {@code events} so that all attendees are free */
   public Collection<TimeRange> query(Collection<Event> events, MeetingRequest request) {
-    throw new UnsupportedOperationException("TODO: Implement this method.");
+
+    if (request.getDuration() > TimeRange.WHOLE_DAY.duration()) {
+      // if the meeting lasts more than a day, there is no solution
+      return new ArrayList<TimeRange>();
+    }
+
+    Collection<String> attendees = request.getAttendees();
+
+    for (Event event : events) {
+      // at least one requested attendee is participating in the event
+      if (event.containsRequestedAttendees(attendees)) {
+        // update the number of meetings during the time of event
+        updateNumberOfMeetings(event.getWhen());
+      }
+    }
+
+    return findAvailableTimeRanges((int)request.getDuration());
+  }
+
+  private void updateNumberOfMeetings(TimeRange when) {
+    // mark that a new meeting starts at when.start()
+    meetings.set(when.start(), meetings.get(when.start()) + 1); 
+    // mark that a new meeting ends right before when.end() 
+    meetings.set(when.end(), meetings.get(when.end()) - 1);
+  }
+
+  /** returns a Collection of time ranges in which the meeting lasting duration minutes can happen */
+  private Collection<TimeRange> findAvailableTimeRanges(int duration) {
+    ArrayList<TimeRange> availableTimeRange = new ArrayList<TimeRange>();
+
+    int lastUnavailableTime = TimeRange.START_OF_DAY - 1;
+    
+    for (int endingTime = TimeRange.START_OF_DAY; endingTime <= TimeRange.END_OF_DAY; ++ endingTime) {
+      meetings.set(endingTime + 1, meetings.get(endingTime) + meetings.get(endingTime + 1));
+
+      if (meetings.get(endingTime) != 0) {
+        // at least one meeting is scheduled during minute endingTime
+        lastUnavailableTime = endingTime;
+      }
+      if (meetings.get(endingTime + 1) != 0 || endingTime == TimeRange.END_OF_DAY) {
+        // there are no meetings during (lastUnavailableTime, endingTime]
+        if (endingTime - lastUnavailableTime >= duration) {
+          // add [lastUnavailableTime + 1, endingTime] as an available time range for the meeting
+          TimeRange timeRange = TimeRange.fromStartEnd(lastUnavailableTime + 1, endingTime, true);
+          availableTimeRange.add(timeRange);
+        }
+      } 
+    }
+
+    return availableTimeRange;
   }
 }
