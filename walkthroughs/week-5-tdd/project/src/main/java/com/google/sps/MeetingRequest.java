@@ -20,11 +20,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 
-/** Class to represent a meeting request that has 
-  * 1. a name
-  * 2. a duration in minutes
-  * 3. a collection of attendees
-  */
 public final class MeetingRequest {
 
   /////////////////////////////////////////////
