@@ -21,18 +21,14 @@ import java.util.ArrayList;
 
 
 public final class FindMeetingQuery {
-  // array representing the number of meetings happening during that minute
-  private ArrayList<Integer> meetings;
-
-  public FindMeetingQuery() {
-    meetings = new ArrayList<Integer>();
-    //before processing the events, the number of meetings for each minute is 0
-    meetings.addAll(Collections.nCopies(TimeRange.END_OF_DAY + 2, 0));
-  }
 
   /** returns a Collection of time ranges when meeting {@code request} can be scheduled in the day of 
     * events so that all attendees are free */
   public Collection<TimeRange> query(Collection<Event> events, MeetingRequest request) {
+    // array representing the number of meetings happening during that minute
+    ArrayList<Integer> meetings = new ArrayList<Integer>();
+    //before processing the events, the number of meetings for each minute is 0
+    meetings.addAll(Collections.nCopies(TimeRange.END_OF_DAY + 2, 0));
 
     if (request.getDuration() > TimeRange.WHOLE_DAY.duration()) {
       // if the meeting lasts more than a day, there is no solution
@@ -45,14 +41,14 @@ public final class FindMeetingQuery {
       // at least one requested attendee is participating in the event
       if (event.containsRequestedAttendees(attendees)) {
         // update the number of meetings during the time of event
-        updateNumberOfMeetings(event.getWhen());
+        updateNumberOfMeetings(meetings, event.getWhen());
       }
     }
 
-    return findAvailableTimeRanges((int)request.getDuration());
+    return findAvailableTimeRanges(meetings, (int)request.getDuration());
   }
 
-  private void updateNumberOfMeetings(TimeRange when) {
+  private void updateNumberOfMeetings(ArrayList<Integer> meetings, TimeRange when) {
     // mark that a new meeting starts at when.start()
     meetings.set(when.start(), meetings.get(when.start()) + 1); 
     // mark that a new meeting ends right before when.end() 
@@ -60,7 +56,7 @@ public final class FindMeetingQuery {
   }
 
   /** returns a Collection of time ranges in which the meeting lasting duration minutes can happen */
-  private Collection<TimeRange> findAvailableTimeRanges(int duration) {
+  private Collection<TimeRange> findAvailableTimeRanges(ArrayList<Integer> meetings, int duration) {
     ArrayList<TimeRange> availableTimeRange = new ArrayList<TimeRange>();
 
     int lastUnavailableTime = TimeRange.START_OF_DAY - 1;
