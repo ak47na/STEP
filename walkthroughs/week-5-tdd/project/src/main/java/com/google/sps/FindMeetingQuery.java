@@ -18,6 +18,7 @@ import java.io.*;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.ArrayList;
+import java.util.stream.*;
 
 
 public final class FindMeetingQuery {
@@ -38,18 +39,20 @@ public final class FindMeetingQuery {
     meetings.addAll(Collections.nCopies(TimeRange.END_OF_DAY - TimeRange.START_OF_DAY + 1, 0));
     Collection<String> attendees = request.getAttendees();
 
-    for (Event event : events) {
-      // at least one requested attendee is participating in the event
-      if (event.containsRequestedAttendees(attendees)) {
-        // update the number of meetings for the start and end time of event
-        updateNumberOfMeetings(meetings, event.getWhen());
-      }
-    }
+    // If at least one requested attendee is participating in the event
+    // update the number of meetings for the start and end time of event
+    events.parallelStream().filter(event -> (event.containsRequestedAttendees(attendees) == true))
+                            .map(Event::getWhen)
+                            .collect(Collectors.toList())
+                            .forEach(eventWhen -> updateNumberOfMeetings(meetings, eventWhen));
+
     // after all events are processed, for each minute x, meetings[x] will represent the number of
     // meetings that start at minute x, minus the number of meetings that end right before minute x
 
     // precompute the prefix sum on the meetings array s.t meetings[x] will represent the number of
-    // meetings that happen at minute x
+    // meetings that happen at minute x:
+    // (before computing the sum):  [ .... +1 ........ -1 .... ]
+    // (after computing the sum) :  [..... +1 +1 ... +1 0 .... ]
     precomputePrefixSum(meetings);
 
     return findAvailableTimeRanges(meetings, (int)request.getDuration());
@@ -58,9 +61,7 @@ public final class FindMeetingQuery {
   /** In meetings array, add 1 to the start time of the meeting and substract 1 from the end time
     * Only the endpoints are changed s.t. after all events are processed and the prefix sum is
     * computed, the number of meetings increases in the array starting from start time and ending
-    * right before the end time:
-    * (before computing the sum):  [ .... +1 ........ -1 .... ]
-    * (after computing the sum) :  [..... +1 +1 ... +1 0 .... ]
+    * right before the end time
    */
   private void updateNumberOfMeetings(ArrayList<Integer> meetings, TimeRange when) {
     // mark that a new meeting starts at when.start()
