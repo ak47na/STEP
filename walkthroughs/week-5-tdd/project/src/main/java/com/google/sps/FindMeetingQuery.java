@@ -21,70 +21,101 @@ import java.util.ArrayList;
 
 
 public final class FindMeetingQuery {
-  // array representing the number of meetings happening during that minute
-  private ArrayList<Integer> meetings;
-
-  public FindMeetingQuery() {
-    meetings = new ArrayList<Integer>();
-    //before processing the events, the number of meetings for each minute is 0
-    meetings.addAll(Collections.nCopies(TimeRange.END_OF_DAY + 2, 0));
-  }
-
+  
+  /** Returns a Collection of time ranges when meeting {@code request} can be scheduled in the day of 
+    * events so that all mandatory and optional attendees are free.
+    * If there is no time range when both mandatory and optional attendees are free, returns all time
+    * ranges when the meeting can be scheduled so that all mandatory attendees are free 
+    * TODO[ak47na]: implement a solution that maximizes the number of optional attendees instead
+    */
   public Collection<TimeRange> query(Collection<Event> events, MeetingRequest request, Collection<String> optionalAttendees) {
-    Collection<String> allAttendees = request.getAttendees();
+    Collection<String> allAttendees = new ArrayList<String>();
+    
+    allAttendees.addAll(request.getAttendees());
     allAttendees.addAll(optionalAttendees);
-
+    // first, create a new MeetingRequest object considering all attendees as mandatory
     MeetingRequest newRequest = new MeetingRequest(allAttendees, request.getDuration());
-    Collection<TimeRange> result = queryNoOptionalAttendees(events, newRequest);
+    Collection<TimeRange> result = queryWithoutOptionalAttendees(events, newRequest);
+
     if (result.size() > 0) {
       return result;
     }
-    return queryNoOptionalAttendees(events, request);
+    // if ther is no suitable time range for both mandatory and optional attendees, find the time ranges
+    // when only the madatory ones are free
+    return queryWithoutOptionalAttendees(events, request);
   }
 
   /** returns a Collection of time ranges when meeting {@code request} can be scheduled in the day of 
-    * events so that all attendees are free */
-  public Collection<TimeRange> queryNoOptionalAttendees(Collection<Event> events, MeetingRequest request) {
+    * events so that all attendees are free 
+    */
+  public Collection<TimeRange> queryWithoutOptionalAttendees(Collection<Event> events, MeetingRequest request) {
 
     if (request.getDuration() > TimeRange.WHOLE_DAY.duration()) {
       // if the meeting lasts more than a day, there is no solution
       return new ArrayList<TimeRange>();
     }
 
+    // array that will represent the number of meetings happening during that minute
+    ArrayList<Integer> meetings = new ArrayList<Integer>();
+    //before processing the events, the number of meetings for each minute is 0
+    meetings.addAll(Collections.nCopies(TimeRange.END_OF_DAY + 1, 0));
     Collection<String> attendees = request.getAttendees();
 
     for (Event event : events) {
       // at least one requested attendee is participating in the event
       if (event.containsRequestedAttendees(attendees)) {
-        // update the number of meetings during the time of event
-        updateNumberOfMeetings(event.getWhen());
+        // update the number of meetings for the start and end time of event
+        updateNumberOfMeetings(meetings, event.getWhen());
       }
     }
+    // after all events are processed, for each minute x, meetings[x] will represent the number of
+    // meetings that start at minute x, minus the number of meetings that end right before minute x
+    
 
-    return findAvailableTimeRanges((int)request.getDuration());
+    // precompute the prefix sum on the meetings array s.t meetings[x] will represent the number of
+    // meetings that happen at minute x
+    precomputePrefixSum(meetings);
+
+    return findAvailableTimeRanges(meetings, (int)request.getDuration());
   }
 
-  private void updateNumberOfMeetings(TimeRange when) {
+  /** In meetings array, add 1 to the start time of the meeting and substract 1 from the end time
+    * Only the endpoints are changed s.t after all events are processed and the prefix sum is
+    * computed, the number of meetings increases in the array starting from start time and ending
+    * right before the end time:
+    * (before computing the sum) meetings = [ .... +1 ........ -1 .... ]
+    * (after computing the sum)  meetings = [..... +1 +1 ... +1 0 .... ]
+   */
+  private void updateNumberOfMeetings(ArrayList<Integer> meetings, TimeRange when) {
     // mark that a new meeting starts at when.start()
     meetings.set(when.start(), meetings.get(when.start()) + 1); 
     // mark that a new meeting ends right before when.end() 
     meetings.set(when.end(), meetings.get(when.end()) - 1);
   }
 
-  /** returns a Collection of time ranges in which the meeting lasting duration minutes can happen */
-  private Collection<TimeRange> findAvailableTimeRanges(int duration) {
+  private void precomputePrefixSum(ArrayList<Integer> meetings) {
+      // compute the sum starting from the second element because the prefix sum for the first 
+      // element is the first element 
+      for (int i = TimeRange.START_OF_DAY + 1; i <= TimeRange.END_OF_DAY + 1; ++ i) {
+        meetings.set(i, meetings.get(i - 1) + meetings.get(i));
+      }
+  }
+
+  /** Given meetings = an array where each element represents the number of meeting that occur at that
+   * minute, and a duration, returns a Collection of time ranges in which the meeting lasting duration
+   * minutes can happen 
+  */
+  private Collection<TimeRange> findAvailableTimeRanges(ArrayList<Integer> meetings, int duration) {
     ArrayList<TimeRange> availableTimeRange = new ArrayList<TimeRange>();
 
     int lastUnavailableTime = TimeRange.START_OF_DAY - 1;
     
     for (int endingTime = TimeRange.START_OF_DAY; endingTime <= TimeRange.END_OF_DAY; ++ endingTime) {
-      meetings.set(endingTime + 1, meetings.get(endingTime) + meetings.get(endingTime + 1));
-
       if (meetings.get(endingTime) != 0) {
         // at least one meeting is scheduled during minute endingTime
         lastUnavailableTime = endingTime;
       }
-      if (meetings.get(endingTime + 1) != 0 || endingTime == TimeRange.END_OF_DAY) {
+      if (endingTime == TimeRange.END_OF_DAY || meetings.get(endingTime + 1) != 0) {
         // there are no meetings during (lastUnavailableTime, endingTime]
         if (endingTime - lastUnavailableTime >= duration) {
           // add [lastUnavailableTime + 1, endingTime] as an available time range for the meeting

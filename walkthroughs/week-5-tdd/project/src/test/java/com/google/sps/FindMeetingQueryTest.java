@@ -125,7 +125,8 @@ public final class FindMeetingQueryTest {
   @Test
   public void everyAttendeeIsConsideredAndBusyOptional() {
     // Have each mandatory person have different events and add optional person C who is busy all day 
-    // We should see three options because each mandatory person has split the restricted times.
+    // We should see three options because the optional attendee is ignored and each mandatory person
+    // has split the restricted times.
     // 
     //
     // Events  :       |--A--|     |--B--|
@@ -159,7 +160,7 @@ public final class FindMeetingQueryTest {
     // Have each mandatory person have different events and add optional person C who has an event
     // between 8:30 and 9:00. We should see two options 
     //
-    // Events  :       |--A--|--C--|--B--|-----|
+    // Events  :       |--A--|--C--|--B--|
     // Day     : |-----------------------------|
     // Options : |--1--|                 |--2--|
 
@@ -287,7 +288,7 @@ public final class FindMeetingQueryTest {
   @Test
   public void justEnoughRoomAndOptionalAttendee() {
     // Based on justEnoughRoom, add an optional attendee B who has an event between 8:30 and 8:45.
-    // The optional attendee should be ignored since considering their schedule would result in a
+    // The optional attendee should be ignored since considering B's schedule would result in a
     // time slot smaller than the requested time.
     //
     // Events  : |--A--|-B-|   |----A----|
@@ -362,8 +363,8 @@ public final class FindMeetingQueryTest {
 
   @Test
   public void noMandatoryAttendees() {
-    // No mandatory attendees, just two optional attendees with several gaps in their schedules.
-    // Those gaps should be identified and returned.
+    // No mandatory attendees, just two optional attendees with one gap in their schedules.
+    // The gap should be identified and returned.
     //
     //
     // Events  : |--A-----|
@@ -403,5 +404,3 @@ public final class FindMeetingQueryTest {
     Assert.assertEquals(expected, actual);
   }
 }
-
-
