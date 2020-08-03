@@ -17,7 +17,9 @@ package com.google.sps;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.*;
 
 /**
  * Event is the container class for when a specific group of people are meeting and are therefore
@@ -97,10 +99,12 @@ public final class Event {
    * Returns true iff at leas one attendee in requestedAttendees participates in this Event 
    */
   public boolean containsRequestedAttendees(Collection<String> requestedAttendees) {
-    for (String requestedAttendee : requestedAttendees) {
-      if (attendees.contains(requestedAttendee)) {
-        return true;
-      }
+    Optional result = 
+    requestedAttendees.parallelStream()
+                      .filter(requestedAttendee -> attendees.contains(requestedAttendee) == true)
+                      .findAny();
+    if (result.isPresent()) {
+      return true;
     }
     return false;
   }
