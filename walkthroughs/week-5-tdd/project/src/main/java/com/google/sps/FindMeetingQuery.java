@@ -75,9 +75,8 @@ public final class FindMeetingQuery {
     // meetings that happen at minute x:
     // (before computing the sum):  [ .... +1 ........ -1 .... ]
     // (after computing the sum) :  [..... +1 +1 ... +1 0 .... ]
-    precomputePrefixSum(meetings);
 
-    return findAvailableTimeRanges(meetings, (int)request.getDuration());
+    return findAvailableTimeRanges(precomputePrefixSum(meetings), (int)request.getDuration());
   }
 
   /** In meetings array, add 1 to the start time of the meeting and substract 1 from the end time
@@ -94,13 +93,19 @@ public final class FindMeetingQuery {
       meetings.set(when.end(), meetings.get(when.end()) - 1);
     }
   }
+  /** Given meetings array, returns meetingsSum, the prefix sum array such that meetingsSum[x] will
+    * represent the number of meetings that happen at minute x.
+    */
+  private ArrayList<Integer> precomputePrefixSum(ArrayList<Integer> meetings) { 
+    ArrayList<Integer> meetingsSum = new ArrayList<Integer>();
 
-  private void precomputePrefixSum(ArrayList<Integer> meetings) {
     // compute the sum starting from the second element because the prefix sum for the first 
-    // element is the first element 
+    // element is the first element
+    meetingsSum.add(meetings.get(0));
     for (int i = TimeRange.START_OF_DAY + 1; i <= TimeRange.END_OF_DAY; ++ i) {
-      meetings.set(i, meetings.get(i - 1) + meetings.get(i));
+      meetingsSum.add(meetingsSum.get(i - 1) + meetings.get(i));
     }
+    return meetingsSum;
   }
 
   /** Given meetings = an array where each element represents the number of meeting that occur at that
