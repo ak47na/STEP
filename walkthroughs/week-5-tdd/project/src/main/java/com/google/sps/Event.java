@@ -17,7 +17,9 @@ package com.google.sps;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Event is the container class for when a specific group of people are meeting and are therefore
@@ -92,5 +94,18 @@ public final class Event {
     // {@code attendees} must be a set for equals to work as expected. According to the {@code Set}
     // interface documentation, equals will check for set-equality across all set implementations.
     return a.title.equals(b.title) && a.when.equals(b.when) && a.attendees.equals(b.attendees);
+  }
+
+  /** Returns true iff at leas one attendee in requestedAttendees participates in this Event. 
+   */
+  public boolean containsRequestedAttendees(Collection<String> requestedAttendees) {
+    Optional result = 
+    requestedAttendees.parallelStream()
+                      .filter(requestedAttendee -> attendees.contains(requestedAttendee) == true)
+                      .findAny();
+    if (result.isPresent()) {
+      return true;
+    }
+    return false;
   }
 }
