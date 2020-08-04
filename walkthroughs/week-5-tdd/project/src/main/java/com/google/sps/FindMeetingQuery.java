@@ -14,19 +14,42 @@
 
 package com.google.sps;
 
+import java.io.*;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public final class FindMeetingQuery {
-
+  
   /** Returns a Collection of time ranges when meeting {@code request} can be scheduled in the day of 
-    * events so that all attendees are free. 
+    * events so that all mandatory and optional attendees are free.
+    * If there is no time range when both mandatory and optional attendees are free, returns all time
+    * ranges when the meeting can be scheduled so that all mandatory attendees are free 
+    * TODO[ak47na]: implement a solution that maximizes the number of optional attendees instead
     */
-  public Collection<TimeRange> query(Collection<Event> events, MeetingRequest request) {
+  public Collection<TimeRange> query(Collection<Event> events, MeetingRequest request, Collection<String> optionalAttendees) {
+    Collection<String> allAttendees = new ArrayList<String>();
+    
+    allAttendees.addAll(request.getAttendees());
+    allAttendees.addAll(optionalAttendees);
+    // first, create a new MeetingRequest object considering all attendees as mandatory
+    MeetingRequest newRequest = new MeetingRequest(allAttendees, request.getDuration());
+    Collection<TimeRange> result = queryWithoutOptionalAttendees(events, newRequest);
 
-    if (request.getDuration() > TimeRange.WHOLE_DAY.duration()) {
+    if (result.size() > 0) {
+      return result;
+    }
+    // if ther is no suitable time range for both mandatory and optional attendees, find the time ranges
+    // when only the madatory ones are free
+    return queryWithoutOptionalAttendees(events, request);
+  }
+
+  /** returns a Collection of time ranges when meeting {@code request} can be scheduled in the day of 
+    * events so that all attendees are free 
+    */
+  public Collection<TimeRange> queryWithoutOptionalAttendees(Collection<Event> events, MeetingRequest request) {
+      if (request.getDuration() > TimeRange.WHOLE_DAY.duration()) {
       // if the meeting lasts more than a day, there is no solution
       return new ArrayList<TimeRange>();
     }
@@ -51,11 +74,10 @@ public final class FindMeetingQuery {
     // meetings that happen at minute x:
     // (before computing the sum):  [ .... +1 ........ -1 .... ]
     // (after computing the sum) :  [..... +1 +1 ... +1 0 .... ]
-    precomputePrefixSum(meetings);
 
-    return findAvailableTimeRanges(meetings, (int)request.getDuration());
+    return findAvailableTimeRanges(precomputePrefixSum(meetings), (int)request.getDuration());
   }
-
+  
   /** In meetings array, add 1 to the start time of the meeting and substract 1 from the end time
     * Only the endpoints are changed such that after all events are processed and the prefix sum is
     * computed, the number of meetings increases in the array starting from start time and ending
@@ -70,20 +92,25 @@ public final class FindMeetingQuery {
       meetings.set(when.end(), meetings.get(when.end()) - 1);
     }
   }
-  /** Computes prefix sum on meetings array such that meetings[x] will represent the number of
-    * meetings that happen at minute x.
+
+  /** Given meetings array, returns meetingsSum, the prefix sum array such that meetingsSum[x] will
+    * represent the number of meetings that happen at minute x.
     */
-  private void precomputePrefixSum(ArrayList<Integer> meetings) {
-      // compute the sum starting from the second element because the prefix sum for the first 
-      // element is the first element 
-      for (int i = TimeRange.START_OF_DAY + 1; i <= TimeRange.END_OF_DAY; ++ i) {
-        meetings.set(i, meetings.get(i - 1) + meetings.get(i));
-      }
+  private ArrayList<Integer> precomputePrefixSum(ArrayList<Integer> meetings) { 
+    ArrayList<Integer> meetingsSum = new ArrayList<Integer>();
+
+    // compute the sum starting from the second element because the prefix sum for the first 
+    // element is the first element
+    meetingsSum.add(meetings.get(0));
+    for (int i = TimeRange.START_OF_DAY + 1; i <= TimeRange.END_OF_DAY; ++ i) {
+      meetingsSum.add(meetingsSum.get(i - 1) + meetings.get(i));
+    }
+    return meetingsSum;
   }
 
   /** Given meetings = an array where each element represents the number of meeting that occur at that
    * minute, and a duration, returns a Collection of time ranges in which the meeting lasting duration
-   * minutes can happen. 
+   * minutes can happen.
   */
   private Collection<TimeRange> findAvailableTimeRanges(ArrayList<Integer> meetings, int duration) {
     ArrayList<TimeRange> availableTimeRange = new ArrayList<TimeRange>();

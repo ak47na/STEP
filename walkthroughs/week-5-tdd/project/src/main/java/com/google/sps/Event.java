@@ -96,16 +96,14 @@ public final class Event {
     return a.title.equals(b.title) && a.when.equals(b.when) && a.attendees.equals(b.attendees);
   }
 
-  /** Returns true iff at leas one attendee in requestedAttendees participates in this Event. 
+  /**
+   * Returns true iff at leas one attendee in requestedAttendees participates in this Event 
    */
   public boolean containsRequestedAttendees(Collection<String> requestedAttendees) {
-    Optional result = 
-    requestedAttendees.parallelStream()
+     
+    return requestedAttendees.parallelStream()
                       .filter(requestedAttendee -> attendees.contains(requestedAttendee) == true)
-                      .findAny();
-    if (result.isPresent()) {
-      return true;
-    }
-    return false;
+                      .findAny()
+                      .isPresent();
   }
 }

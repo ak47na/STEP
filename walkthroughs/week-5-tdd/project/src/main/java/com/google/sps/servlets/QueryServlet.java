@@ -21,6 +21,7 @@ import com.google.sps.TimeRange;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -38,8 +39,9 @@ public class QueryServlet extends HttpServlet {
 
     // Find the possible meeting times.
     FindMeetingQuery findMeetingQuery = new FindMeetingQuery();
+    Collection<String> optionalAttendees = new ArrayList();
     Collection<TimeRange> answer =
-        findMeetingQuery.query(Arrays.asList(Events.events), meetingRequest);
+        findMeetingQuery.query(Arrays.asList(Events.events), meetingRequest, optionalAttendees);
 
     // Convert the times to JSON
     String jsonResponse = gson.toJson(answer);
