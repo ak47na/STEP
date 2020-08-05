@@ -23,9 +23,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/** Servlet that returns the login status of users
-  * "0" if no user is logged in
-  * "1 userEmail" otherwise
+/** Servlet that returns a JSON with the login-status of the user:
+  * If the user is logged-in, the JSON object contains user's email and a logout link.
+  * Otherwise the JSON object contains a login link.
+  * In both cases, the JSON contains "isLoggedIn", a boolean used to check login status.
  */
 @WebServlet("/login-status")
 public class LoginStatusServlet extends HttpServlet {

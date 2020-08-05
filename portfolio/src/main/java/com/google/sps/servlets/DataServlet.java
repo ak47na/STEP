@@ -44,7 +44,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
-import java.util.*; 
 
 import javax.servlet.ServletException;
 import javax.servlet.RequestDispatcher;
@@ -64,7 +63,7 @@ public class DataServlet extends HttpServlet {
   private UserService userService; 
 
 
-  /** Initializes data needed to load comments from datastore when requested */
+  /** Initializes data needed to load comments from datastore when requested. */
   @Override
   public void init() {
     userService = UserServiceFactory.getUserService();
@@ -73,7 +72,7 @@ public class DataServlet extends HttpServlet {
   }
 
   /**
-   * Sends at most commentsLimit comments as a JSON string
+   * Sends at most commentsLimit comments as a JSON string.
    */
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -97,8 +96,8 @@ public class DataServlet extends HttpServlet {
   }
 
   /**
-   * Handles POST requests submitted by commentForm when comments(message and/or image file) are posted
-   * The comments are stored in a datastore and retrieved in the doGet method
+   * Handles POST requests submitted by commentForm when comments(message and/or image file) are posted.
+   * The comments are stored in a datastore and retrieved in the doGet method.
    */
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -168,7 +167,7 @@ public class DataServlet extends HttpServlet {
     }
   }
 
-  /** Returns an array with at most limit Comment objects */
+  /** Returns an array with at most limit Comment objects. */
   private List<Comment> getCommentsArray(int limit) throws IOException{
     PreparedQuery results = datastore.prepare(commentsQuery);
 
@@ -191,7 +190,7 @@ public class DataServlet extends HttpServlet {
     return comments;
   }
 
-  /** Creates Entity with a kind of Comment */
+  /** Creates Entity with a kind of Comment. */
   private Entity createCommentEntity(String newComment, String userEmail, String userId, String imageUrl) {
     Entity commentEntity = new Entity("Comment");
     Timestamp timestamp = new Timestamp(System.currentTimeMillis());
@@ -203,7 +202,10 @@ public class DataServlet extends HttpServlet {
     commentEntity.setProperty("imageUrl", imageUrl);
     return commentEntity;
   }
-  
+
+  /** Returns a String representing the text message entered by the user in commentForm.
+    * @throws UnsupportedEncodingException if the text contains invalid characters.
+    */
   private String getNewComment(HttpServletRequest request) throws UnsupportedEncodingException {
     String newComment = request.getParameter("new-comment");
    
@@ -211,7 +213,7 @@ public class DataServlet extends HttpServlet {
     return newComment;
   }
 
-  /** Returns the nickname of the user or null if no nickname was set by the user */
+  /** Returns the nickname of the user or null if no nickname was set by the user. */
   private String getUserNickname(String userId) {
     Query query = new Query("UserInfo").setFilter(new Query.FilterPredicate("id", Query.FilterOperator.EQUAL, userId));
     PreparedQuery result = datastore.prepare(query);
