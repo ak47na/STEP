@@ -86,7 +86,7 @@ function getComments() {
         // TODO[ak47na]: display the sentiment score in a more descriptive way
 
         commentItem = createListElement(`${messageAndScore}: ${comments[commentIndex].userData}`);
-        imageElement = createImageElement(comments[commentIndex].imageUrl);
+        imageElement = createImageElement(comments[commentIndex].imageString);
         // if the comment contains an image add it to the message
         if (imageElement !== null) 
           commentItem.appendChild(imageElement);
@@ -118,11 +118,11 @@ function createListElement(text) {
 /** 
  * Returns HTML image element from url.
  */
-function createImageElement(url) {
-  if (!url) 
+function createImageElement(imageString) {
+  if (!imageString) 
     return null;
   const imgElement = document.createElement('img');
-  imgElement.src = url;
+  imgElement.src = `/display-blobstore?blob=${imageString}`;
   return imgElement;
 }
 
