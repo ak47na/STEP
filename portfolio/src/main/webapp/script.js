@@ -122,6 +122,7 @@ function createImageElement(imageString) {
   if (!imageString) 
     return null;
   const imgElement = document.createElement('img');
+  // send GET request to DisplayBlobServlet to serve the image with imageString as blobKey string
   imgElement.src = `/display-blobstore?blob=${imageString}`;
   return imgElement;
 }
