@@ -86,7 +86,7 @@ function getComments() {
         // TODO[ak47na]: display the sentiment score in a more descriptive way
 
         commentItem = createListElement(`${messageAndScore}: ${comments[commentIndex].userData}`);
-        imageElement = createImageElement(comments[commentIndex].imageString);
+        imageElement = createImageElement(comments[commentIndex].imageBlobstoreKey);
         // if the comment contains an image add it to the message
         if (imageElement !== null) 
           commentItem.appendChild(imageElement);
@@ -118,12 +118,13 @@ function createListElement(text) {
 /** 
  * Returns HTML image element from url.
  */
-function createImageElement(imageString) {
-  if (!imageString) 
+function createImageElement(imageBlobstoreKey) {
+  if (!imageBlobstoreKey) 
     return null;
   const imgElement = document.createElement('img');
-  // send GET request to DisplayBlobServlet to serve the image with imageString as blobKey string
-  imgElement.src = `/display-blobstore?blob=${imageString}`;
+  // imgElement is stored in blobstore with the key imageBlobstoreKey
+  // To get the image,the browser sends a GET request to BlobServlet
+  imgElement.src = `/retrieve-blobstore?blob=${imageBlobstoreKey}`;
   return imgElement;
 }
 

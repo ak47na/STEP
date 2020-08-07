@@ -18,15 +18,16 @@ import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 import java.io.IOException;
+import java.lang.IllegalArgumentException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * This servlet is called to display images stored in Blobstore given their blobKey
+ * This servlet is called to display images stored in Blobstore given their blobKey.
  */
-@WebServlet("/display-blobstore")
+@WebServlet("/retrieve-blobstore")
 public class DisplayBlobServlet extends HttpServlet {
 
   @Override
@@ -37,8 +38,13 @@ public class DisplayBlobServlet extends HttpServlet {
     */
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
-    BlobKey blobKey = new BlobKey(request.getParameter("blob"));
-
-    blobstoreService.serve(blobKey, response);
+    try {
+      BlobKey blobKey = new BlobKey(request.getParameter("blob"));
+      blobstoreService.serve(blobKey, response);
+    } catch (Exception e) {
+      // Send a HTTP 400 Bad Request response if the blob parameter is null or 
+      // if the blob key was not found in Blobstore
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+    }
   }
 }

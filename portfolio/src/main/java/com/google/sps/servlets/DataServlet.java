@@ -113,13 +113,13 @@ public class DataServlet extends HttpServlet {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
     }
 
-    String imageString = getUploadedFileString(request, response, "image", "image/");
+    String imageBlobstoreKey = getUploadedFileString(request, response, "image", "image/");
     userService = UserServiceFactory.getUserService();
-    if (imageString != null || newComment != null) {
+    if (imageBlobstoreKey != null || newComment != null) {
       User currentUser = userService.getCurrentUser();
       String userEmail = currentUser.getEmail();
       String userId = currentUser.getUserId();
-      datastore.put(createCommentEntity(newComment, userEmail, userId, imageString));
+      datastore.put(createCommentEntity(newComment, userEmail, userId, imageBlobstoreKey));
     }
 
     // Redirect to the HTML page.
@@ -175,8 +175,8 @@ public class DataServlet extends HttpServlet {
       if (nickname == null) {
         nickname = (String)entity.getProperty("userEmail");
       }
-      String imageString = (String)entity.getProperty("imageString");
-      Comment comment = new Comment((String)entity.getProperty("message"), nickname, imageString);
+      String imageBlobstoreKey = (String)entity.getProperty("imageBlobstoreKey");
+      Comment comment = new Comment((String)entity.getProperty("message"), nickname, imageBlobstoreKey);
       
       comments.add(comment);
     }
@@ -185,7 +185,7 @@ public class DataServlet extends HttpServlet {
   }
 
   /** Creates Entity with a kind of Comment. */
-  private Entity createCommentEntity(String newComment, String userEmail, String userId, String imageString) {
+  private Entity createCommentEntity(String newComment, String userEmail, String userId, String imageBlobstoreKey) {
     Entity commentEntity = new Entity("Comment");
     Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 
@@ -193,7 +193,7 @@ public class DataServlet extends HttpServlet {
     commentEntity.setProperty("timestamp", timestamp.getTime());
     commentEntity.setProperty("userEmail", userEmail);
     commentEntity.setProperty("userNickname", getUserNickname(userId));
-    commentEntity.setProperty("imageString", imageString);
+    commentEntity.setProperty("imageBlobstoreKey", imageBlobstoreKey);
     return commentEntity;
   }
 
