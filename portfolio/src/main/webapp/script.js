@@ -86,7 +86,7 @@ function getComments() {
         // TODO[ak47na]: display the sentiment score in a more descriptive way
 
         commentItem = createListElement(`${messageAndScore}: ${comments[commentIndex].userData}`);
-        imageElement = createImageElement(comments[commentIndex].imageUrl);
+        imageElement = createImageElement(comments[commentIndex].imageBlobstoreKey);
         // if the comment contains an image add it to the message
         if (imageElement !== null) 
           commentItem.appendChild(imageElement);
@@ -100,14 +100,14 @@ function getComments() {
 
 /** 
  * Sends a POST request to DeleteDataServlet to delete all the comments and calls getComments() to
- * remove the comments from the page
+ * remove the comments from the page.
  */
 function deleteAllComments() {
   fetch('delete-data', {method: 'POST'}).then(getComments());
 }
 
 /** 
- * Returns HTML list element with text 
+ * Returns HTML list element with text. 
  */
 function createListElement(text) {
   const liElement = document.createElement('li');
@@ -116,13 +116,15 @@ function createListElement(text) {
 }
 
 /** 
- * Returns HTML image element from Url 
+ * Returns HTML image element from url.
  */
-function createImageElement(url) {
-  if (!url) 
+function createImageElement(imageBlobstoreKey) {
+  if (!imageBlobstoreKey) 
     return null;
   const imgElement = document.createElement('img');
-  imgElement.src = Url;
+  // imgElement is stored in blobstore with the key imageBlobstoreKey
+  // To get the image,the browser sends a GET request to BlobServlet
+  imgElement.src = `/retrieve-blobstore?blob=${imageBlobstoreKey}`;
   return imgElement;
 }
 
@@ -153,8 +155,8 @@ function updateVisibilityForLoginStatus() {
 
 /**
  * Fetch BlobUploadUrl from BlobstoreUploadServlet and set it as the action for the comment form
- * When the form is submitted, the request goes to Blobstore which handles the image upload
- * Then, Blobstore forwards the request to DataServlet
+ * When the form is submitted, the request goes to Blobstore which handles the image upload.
+ * Then, Blobstore forwards the request to DataServlet.
  */
 function fetchBlobstoreUrlAndSetFormAction(commentFormId) {
   fetch('/blobstore-upload-url').then(response => response.text()).then(BlobUploadUrl => {
@@ -164,7 +166,7 @@ function fetchBlobstoreUrlAndSetFormAction(commentFormId) {
 }
 
 /**
- * Display the element with id=elementId if isShown === true, otherwise hide it
+ * Display the element with id=elementId if isShown === true, otherwise hide it.
  */
 function displayElement(elementId, isShown) {
   element = document.getElementById(elementId);
@@ -176,7 +178,7 @@ function displayElement(elementId, isShown) {
 }
 
 /**
- * Update the element with id=elementId to link to link
+ * Update the element with id=elementId to link to link.
  */
 function updateLink(elementId, link) {
   element = document.getElementById(elementId);

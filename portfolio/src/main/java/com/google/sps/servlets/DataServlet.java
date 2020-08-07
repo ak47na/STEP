@@ -44,7 +44,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
-import java.util.*; 
+import java.util.ArrayList;
 
 import javax.servlet.ServletException;
 import javax.servlet.RequestDispatcher;
@@ -64,16 +64,15 @@ public class DataServlet extends HttpServlet {
   private UserService userService; 
 
 
-  /** Initializes data needed to load comments from datastore when requested */
+  /** Initializes data needed to load comments from datastore when requested. */
   @Override
   public void init() {
-    userService = UserServiceFactory.getUserService();
     datastore = DatastoreServiceFactory.getDatastoreService();
     commentsQuery = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
   }
 
   /**
-   * Sends at most commentsLimit comments as a JSON string
+   * Sends at most commentsLimit comments as a JSON string.
    */
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -97,8 +96,8 @@ public class DataServlet extends HttpServlet {
   }
 
   /**
-   * Handles POST requests submitted by commentForm when comments(message and/or image file) are posted
-   * The comments are stored in a datastore and retrieved in the doGet method
+   * Handles POST requests submitted by commentForm when comments(message and/or image file) are posted.
+   * The comments are stored in a datastore and retrieved in the doGet method.
    */
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -114,12 +113,13 @@ public class DataServlet extends HttpServlet {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
     }
 
-    String imageUrl = getUploadedFileUrl(request, "image", "image/");
-    if (imageUrl != null || newComment != null) {
+    String imageBlobstoreKey = getUploadedFileString(request, response, "image", "image/");
+    userService = UserServiceFactory.getUserService();
+    if (imageBlobstoreKey != null || newComment != null) {
       User currentUser = userService.getCurrentUser();
       String userEmail = currentUser.getEmail();
       String userId = currentUser.getUserId();
-      datastore.put(createCommentEntity(newComment, userEmail, userId, imageUrl));
+      datastore.put(createCommentEntity(newComment, userEmail, userId, imageBlobstoreKey));
     }
 
     // Redirect to the HTML page.
@@ -129,12 +129,12 @@ public class DataServlet extends HttpServlet {
   /** Returns a URL that points to the uploaded file, or null if the user didn't upload a file of 
    *  type contentType. 
    */
-  private String getUploadedFileUrl(HttpServletRequest request, String formInputElementName, String contentType) {
+  private String getUploadedFileString(HttpServletRequest request, HttpServletResponse response, String formInputElementName, String contentType) throws IOException{
     BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
     // getUploads returns Map with values as List of BlobKey for any files that were uploaded,
     // keyed by the "name" field of the uploaded form.
     Map<String, List<BlobKey>> blobs = blobstoreService.getUploads(request);
-    List<BlobKey> blobKeys = blobs.get("image");
+    List<BlobKey> blobKeys = blobs.get(formInputElementName);
 
     // User submitted form without selecting a file, so we can't get a URL. (dev server)
     if (blobKeys == null || blobKeys.isEmpty()) {
@@ -147,28 +147,21 @@ public class DataServlet extends HttpServlet {
     // User submitted form without selecting a file, so we can't get a URL. (live server)
     BlobInfo blobInfo = new BlobInfoFactory().loadBlobInfo(blobKey);
     if (blobInfo.getSize() == 0) {
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No image uploaded!");
       blobstoreService.delete(blobKey);
       return null;
     }
     // check that the user submitted a file of type contentType
     if (!blobInfo.getContentType().contains(contentType)) {
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid file upload");
+      blobstoreService.delete(blobKey);
       return null;
     }
 
-    // Use ImagesService to get a URL that points to the uploaded file.
-    ImagesService imagesService = ImagesServiceFactory.getImagesService();
-    ServingUrlOptions options = ServingUrlOptions.Builder.withBlobKey(blobKey);
-
-    try {
-      //obtains a URL (which contains a host) that can dynamically serve the image stored as blob.
-      URL url = new URL(imagesService.getServingUrl(options));
-      return url.getPath();
-    } catch (MalformedURLException e) {
-      return imagesService.getServingUrl(options);
-    }
+    return blobKey.getKeyString();
   }
 
-  /** Returns an array with at most limit Comment objects */
+  /** Returns an array with at most limit Comment objects. */
   private List<Comment> getCommentsArray(int limit) throws IOException{
     PreparedQuery results = datastore.prepare(commentsQuery);
 
@@ -182,8 +175,8 @@ public class DataServlet extends HttpServlet {
       if (nickname == null) {
         nickname = (String)entity.getProperty("userEmail");
       }
-      String imageUrl = (String)entity.getProperty("imageUrl");
-      Comment comment = new Comment((String)entity.getProperty("message"), nickname, imageUrl);
+      String imageBlobstoreKey = (String)entity.getProperty("imageBlobstoreKey");
+      Comment comment = new Comment((String)entity.getProperty("message"), nickname, imageBlobstoreKey);
       
       comments.add(comment);
     }
@@ -191,8 +184,8 @@ public class DataServlet extends HttpServlet {
     return comments;
   }
 
-  /** Creates Entity with a kind of Comment */
-  private Entity createCommentEntity(String newComment, String userEmail, String userId, String imageUrl) {
+  /** Creates Entity with a kind of Comment. */
+  private Entity createCommentEntity(String newComment, String userEmail, String userId, String imageBlobstoreKey) {
     Entity commentEntity = new Entity("Comment");
     Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 
@@ -200,10 +193,13 @@ public class DataServlet extends HttpServlet {
     commentEntity.setProperty("timestamp", timestamp.getTime());
     commentEntity.setProperty("userEmail", userEmail);
     commentEntity.setProperty("userNickname", getUserNickname(userId));
-    commentEntity.setProperty("imageUrl", imageUrl);
+    commentEntity.setProperty("imageBlobstoreKey", imageBlobstoreKey);
     return commentEntity;
   }
-  
+
+  /** Returns a String representing the text message entered by the user in commentForm.
+    * @throws UnsupportedEncodingException if the text contains invalid characters.
+    */
   private String getNewComment(HttpServletRequest request) throws UnsupportedEncodingException {
     String newComment = request.getParameter("new-comment");
    
@@ -211,7 +207,7 @@ public class DataServlet extends HttpServlet {
     return newComment;
   }
 
-  /** Returns the nickname of the user or null if no nickname was set by the user */
+  /** Returns the nickname of the user or null if no nickname was set by the user. */
   private String getUserNickname(String userId) {
     Query query = new Query("UserInfo").setFilter(new Query.FilterPredicate("id", Query.FilterOperator.EQUAL, userId));
     PreparedQuery result = datastore.prepare(query);
